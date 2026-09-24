@@ -76,6 +76,41 @@
     </div>
   </section>
 
+  <section id="cctv-watch-module" class="module-surface cctv-watch-module" aria-label="CCTV watch module">
+    <header class="cctv-watch-header">
+      <div>
+        <span>CCTV WATCH</span>
+        <h2>Camera Intelligence</h2>
+      </div>
+      <button id="cctv-watch-refresh" type="button">REFRESH</button>
+    </header>
+    <div class="cctv-watch-grid">
+      <aside class="cctv-watch-list-panel">
+        <div class="cctv-watch-list-status" id="cctv-watch-list-status" role="status" aria-live="polite">Loading cameras</div>
+        <label class="cctv-watch-selector cctv-watch-combobox">
+          <span>CAMERA FEED</span>
+          <input id="cctv-watch-camera-combobox" type="search" placeholder="Search or select a camera feed..." autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="cctv-watch-camera-options" aria-label="Search or select CCTV camera feed" disabled />
+          <div id="cctv-watch-camera-options" class="cctv-watch-options" role="listbox" hidden></div>
+        </label>
+      </aside>
+      <section class="cctv-watch-detail" aria-labelledby="cctv-watch-title">
+        <div class="cctv-watch-frame-wrap">
+          <img id="cctv-watch-frame" alt="" hidden />
+          <div id="cctv-watch-empty" class="cctv-watch-empty">Select a camera feed</div>
+        </div>
+        <div class="cctv-watch-detail-body">
+          <div>
+            <span id="cctv-watch-provider" class="cctv-watch-kicker">NO FEED SELECTED</span>
+            <h3 id="cctv-watch-title">Camera detail</h3>
+            <p id="cctv-watch-meta">Choose a camera to prepare analysis.</p>
+          </div>
+          <button id="cctv-watch-analyze" type="button" disabled>RUN SCAN</button>
+        </div>
+        <pre id="cctv-watch-report" class="cctv-watch-report" aria-live="polite">YOLO scaffold idle.</pre>
+      </section>
+    </div>
+  </section>
+
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 const MODULES = Object.freeze([
   { id: 'god-eye', label: "God's Eye View", elementId: 'god-eye-module' },
+  { id: 'cctv-watch', label: 'CCTV Watch', elementId: 'cctv-watch-module' },
   { id: 'coming-soon', label: 'Coming Soon', elementId: 'coming-soon-module' },
 ]);
 

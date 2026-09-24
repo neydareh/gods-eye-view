@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "reports": [
+    {
+      "schemaVersion": 1,
+      "receivedAt": "2026-09-24T19:42:52.417Z",
+      "module": "cctv-watch",
+      "cameraId": "354",
+      "cameraName": "5TH ST / CONGRESS AVE",
+      "provider": "Austin Transportation & Public Works",
+      "city": "Austin",
+      "capturedAt": "2026-09-24T19:42:52.414Z",
+      "model": {
+        "kind": "yolo",
+        "status": "not_configured"
+      },
+      "detections": [],
+      "suspiciousBehaviors": [],
+      "notes": [
+        "Scaffold report only. Wire a YOLO runtime before treating this as analysis."
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "receivedAt": "2026-09-24T19:43:36.434Z",
+      "module": "cctv-watch",
+      "cameraId": "691",
+      "cameraName": "12TH ST / SAN JACINTO BLVD",
+      "provider": "Austin Transportation & Public Works",
+      "city": "Austin",
+      "capturedAt": "2026-09-24T19:43:36.432Z",
+      "model": {
+        "kind": "yolo",
+        "status": "not_configured"
+      },
+      "detections": [],
+      "suspiciousBehaviors": [],
+      "notes": [
+        "Scaffold report only. Wire a YOLO runtime before treating this as analysis."
+      ]
+    }
+  ]
+}

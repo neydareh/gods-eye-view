@@ -134,6 +134,20 @@
   overflow: hidden;
 }
 
+body > .module-surface {
+  display: none;
+}
+
+.module-pane > .module-surface {
+  display: block;
+}
+
+.module-pane > .coming-soon-module,
+.module-pane > .empty-module,
+.module-pane > .cctv-watch-module {
+  display: grid;
+}
+
 .god-eye-module {
   transform: translateZ(0);
   background: var(--bg-dark);
@@ -158,6 +172,21 @@
 
 .god-eye-module #top-center-actions {
   top: 76px;
+}
+
+.god-eye-module #global-loading-status {
+  top: 132px;
+  max-width: min(520px, calc(100% - 96px));
+}
+
+.god-eye-module #traffic-sync-chip {
+  top: 184px;
+  max-width: min(460px, calc(100% - 96px));
+}
+
+.god-eye-module #cctv-sync-chip {
+  top: 236px;
+  max-width: min(460px, calc(100% - 96px));
 }
 
 .god-eye-module #style-indicator {

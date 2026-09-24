@@ -1,8 +1,10 @@
 import { createStandaloneApplication } from './standalone/application.js';
 import { describeError } from './standalone/errors.js';
 import { initializeParentShell } from './parentShell.js';
+import { initializeCctvWatchModule } from './cctvWatchModule.js';
 
 export const parentShell = initializeParentShell();
+export const cctvWatchModule = initializeCctvWatchModule();
 
 const application = createStandaloneApplication({
   googleApiKey: import.meta.env.GOOGLE_MAPS_API_KEY,

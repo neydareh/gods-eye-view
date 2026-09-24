@@ -16,23 +16,65 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&icon_names=adjust,arrow_drop_down,arrow_forward,arrow_left,arrow_right,bolt,chevron_left,chevron_right,close,close_fullscreen,dark_mode,draw,east,flare,flight,layers_clear,light_mode,local_fire_department,my_location,navigation,normal,on,open_in_full,public,radar,radio,right_panel_close,right_panel_open,rocket_launch,skip_next,skip_previous,view_in_ar" rel="stylesheet" />
 </head>
 <body>
-  <!-- gev:template scene-chrome -->
+  <main id="parent-app-shell" class="parent-app-shell" aria-label="Application modules">
+    <header class="parent-app-topbar">
+      <div class="parent-app-brand">
+        <span class="parent-app-logo brand-logo" data-logo-gaze data-logo-src="/logo.svg" aria-hidden="true"><img src="/logo.svg" alt="" /></span>
+        <span>
+          <strong>GOD'S EYE VIEW</strong>
+          <small>MODULE COMMAND</small>
+        </span>
+      </div>
+      <div class="parent-app-layout-controls" aria-label="Module layout">
+        <label>
+          <span>LEFT</span>
+          <select id="left-module-select" aria-label="Left module"></select>
+        </label>
+        <label>
+          <span>RIGHT</span>
+          <select id="right-module-select" aria-label="Right module"></select>
+        </label>
+      </div>
+    </header>
 
-  <!-- gev:template cockpit -->
+    <section class="parent-app-split" aria-label="Split module workspace">
+      <section id="left-module-pane" class="module-pane module-pane-left" aria-label="Left module"></section>
+      <section id="right-module-pane" class="module-pane module-pane-right" aria-label="Right module"></section>
+    </section>
+  </main>
 
-  <!-- gev:template display-controls -->
+  <section id="god-eye-module" class="module-surface god-eye-module" aria-label="God Eye application">
+    <!-- gev:template scene-chrome -->
 
-  <!-- gev:template command-dock -->
+    <!-- gev:template cockpit -->
 
-  <!-- gev:template layer-panels -->
+    <!-- gev:template display-controls -->
 
-  <!-- gev:template context -->
+    <!-- gev:template command-dock -->
 
-  <!-- gev:template welcome -->
+    <!-- gev:template layer-panels -->
 
-  <!-- gev:template provider-settings -->
+    <!-- gev:template context -->
 
-  <!-- gev:template hud-loading -->
+    <!-- gev:template welcome -->
+
+    <!-- gev:template provider-settings -->
+
+    <!-- gev:template hud-loading -->
+  </section>
+
+  <section id="coming-soon-module" class="module-surface coming-soon-module" aria-label="Coming soon module">
+    <div class="coming-soon-panel">
+      <span class="coming-soon-kicker">MODULE 02</span>
+      <h2>COMING SOON</h2>
+      <p>Reserved for the next sub-app.</p>
+      <div class="coming-soon-readout" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </section>
 
   <script type="module" src="/src/main.js"></script>
 </body>

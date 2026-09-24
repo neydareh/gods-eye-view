@@ -2,7 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createApplication } from './application.js';
-import { installTrackpadPinchZoom } from './viewer.js';
+import {
+  applyViewerSmoothness,
+  installTrackpadPinchZoom,
+  resolveViewerPerformanceOptions,
+} from './viewer.js';
 
 const phases = ['Scene', 'Controls', 'Data', 'Tools'];
 function fixture(overrides = {}) {
@@ -217,6 +221,73 @@ test('the separate viewer export imports without constructing a browser viewer',
     await import('gods-eye-view/application/viewer');
   assert.equal(typeof createApplicationViewer, 'function');
   assert.throws(() => createApplicationViewer({}), /containers are required/);
+});
+
+test('viewer performance options expose quality and performance presets', () => {
+  assert.deepEqual(
+    resolveViewerPerformanceOptions({
+      mode: 'quality',
+      env: () => '',
+      storage: () => '',
+    }),
+    {
+      mode: 'quality',
+      msaaSamples: 4,
+      preserveDrawingBuffer: true,
+      resolutionScale: 1,
+      targetFrameRate: 120,
+    },
+  );
+  assert.deepEqual(
+    resolveViewerPerformanceOptions({
+      mode: 'performance',
+      env: () => '',
+      storage: () => '',
+    }),
+    {
+      mode: 'performance',
+      msaaSamples: 1,
+      preserveDrawingBuffer: false,
+      resolutionScale: 0.75,
+      targetFrameRate: 120,
+    },
+  );
+});
+
+test('viewer smoothness tunes Cesium camera inertia', () => {
+  const controller = {};
+  applyViewerSmoothness({
+    scene: { screenSpaceCameraController: controller },
+  });
+  assert.deepEqual(controller, {
+    inertiaSpin: 0.92,
+    inertiaTranslate: 0.92,
+    inertiaZoom: 0.86,
+    maximumMovementRatio: 0.07,
+  });
+});
+
+test('viewer performance options accept env overrides', () => {
+  const values = new Map([
+    ['VITE_GEV_MSAA_SAMPLES', '2'],
+    ['VITE_GEV_PRESERVE_DRAWING_BUFFER', 'false'],
+    ['VITE_GEV_RESOLUTION_SCALE', '0.8'],
+    ['VITE_GEV_TARGET_FRAME_RATE', '30'],
+  ]);
+  assert.deepEqual(
+    resolveViewerPerformanceOptions({
+      mode: 'quality',
+      env: (key) => values.get(key) || '',
+      storage: () => '',
+    }),
+    {
+      mode: 'quality',
+      msaaSamples: 2,
+      preserveDrawingBuffer: false,
+      resolutionScale: 0.8,
+      targetFrameRate: 30,
+    },
+  );
 });
 
 function pinchFixture({ zoomEventTypes } = {}) {

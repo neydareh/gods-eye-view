@@ -1,6 +1,21 @@
 import { applicationHtmlPlugin } from './application-html.js';
 import cesium from 'vite-plugin-cesium';
 
+function manualChunks(id) {
+  const normalized = id.split('\\').join('/');
+  if (normalized.includes('/node_modules/hls.js/')) return 'hls';
+  if (
+    normalized.includes('/node_modules/@jtarrio/') ||
+    normalized.includes('/src/sdr/')
+  )
+    return 'sdr';
+  if (normalized.includes('/src/cctvWatchModule.js')) return 'cctv-watch';
+  if (normalized.includes('/src/layers/recentImagery/'))
+    return 'recent-imagery';
+  if (normalized.includes('/src/data/local_data/')) return 'local-data';
+  return undefined;
+}
+
 /** Build browser assets with explicit inputs; never load environment or providers. */
 export function createBrowserViteConfig({
   plugins = [],
@@ -48,6 +63,11 @@ export function createBrowserViteConfig({
       'import.meta.env.GOOGLE_MAPS_API_KEY': JSON.stringify(googleApiKey),
       'import.meta.env.CESIUM_ION_TOKEN': JSON.stringify(cesiumToken),
     },
-    build: { chunkSizeWarningLimit: 1500 },
+    build: {
+      chunkSizeWarningLimit: 1500,
+      rollupOptions: {
+        output: { manualChunks },
+      },
+    },
   };
 }

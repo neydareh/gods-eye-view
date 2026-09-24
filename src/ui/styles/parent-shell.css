@@ -149,8 +149,16 @@ body > .module-surface {
 }
 
 .god-eye-module {
+  contain: layout paint size;
+  isolation: isolate;
   transform: translateZ(0);
   background: var(--bg-dark);
+}
+
+.god-eye-module canvas,
+.god-eye-module #cesiumContainer {
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .god-eye-module #cesiumContainer,

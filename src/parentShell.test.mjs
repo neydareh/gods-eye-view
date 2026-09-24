@@ -60,11 +60,22 @@ function fixture() {
   };
   let resizeCount = 0;
   const windowRef = {
+    CustomEvent: class {
+      constructor(type, init = {}) {
+        this.type = type;
+        this.detail = init.detail;
+      }
+    },
     dispatchEvent(event) {
       if (event.type === 'resize') resizeCount += 1;
     },
   };
-  return { elements, documentRef, windowRef, getResizeCount: () => resizeCount };
+  return {
+    elements,
+    documentRef,
+    windowRef,
+    getResizeCount: () => resizeCount,
+  };
 }
 
 test('parent shell mounts God Eye left and Coming Soon right by default', () => {
@@ -83,6 +94,37 @@ test('parent shell mounts God Eye left and Coming Soon right by default', () => 
     f.elements.get('coming-soon-module'),
   );
   assert.equal(f.getResizeCount(), 1);
+});
+
+test('parent shell publishes module changes', () => {
+  const f = fixture();
+  const changes = [];
+  const shell = initializeParentShell({
+    ...f,
+    onModulesChanged: (state) => changes.push(state),
+  });
+  shell.setModules({ left: 'coming-soon', right: 'cctv-watch' });
+  assert.deepEqual(changes, [
+    { left: 'god-eye', right: 'coming-soon' },
+    { left: 'coming-soon', right: 'cctv-watch' },
+  ]);
+});
+
+test('parent shell schedules resize frames for smooth Cesium remounts', () => {
+  const f = fixture();
+  const frames = [];
+  f.windowRef.requestAnimationFrame = (callback) => {
+    frames.push(callback);
+    return frames.length;
+  };
+  initializeParentShell(f);
+  assert.equal(f.getResizeCount(), 1);
+  assert.equal(frames.length, 1);
+  frames.shift()();
+  assert.equal(f.getResizeCount(), 2);
+  assert.equal(frames.length, 1);
+  frames.shift()();
+  assert.equal(f.getResizeCount(), 3);
 });
 
 test('parent shell moves God Eye instead of duplicating it', () => {

@@ -34,9 +34,38 @@ function moduleById(moduleId) {
   return MODULES.find((module) => module.id === moduleId) || MODULES[1];
 }
 
+function createModuleChangeEvent(windowRef, detail) {
+  const EventCtor =
+    windowRef?.CustomEvent ||
+    (typeof CustomEvent === 'function' ? CustomEvent : null);
+  if (EventCtor) return new EventCtor('gev:modules-changed', { detail });
+  const event = new Event('gev:modules-changed');
+  event.detail = detail;
+  return event;
+}
+
+function dispatchResize(windowRef) {
+  windowRef.dispatchEvent(new Event('resize'));
+}
+
+function scheduleResizeFrames(windowRef) {
+  dispatchResize(windowRef);
+  const requestFrame =
+    windowRef?.requestAnimationFrame ||
+    (typeof requestAnimationFrame === 'function'
+      ? requestAnimationFrame
+      : null);
+  if (!requestFrame) return;
+  requestFrame(() => {
+    dispatchResize(windowRef);
+    requestFrame(() => dispatchResize(windowRef));
+  });
+}
+
 export function initializeParentShell({
   documentRef = document,
   windowRef = window,
+  onModulesChanged,
 } = {}) {
   const shell = documentRef.getElementById('parent-app-shell');
   const leftPane = documentRef.getElementById('left-module-pane');
@@ -77,7 +106,10 @@ export function initializeParentShell({
     rightSelect.value = state.right;
     shell.dataset.leftModule = state.left;
     shell.dataset.rightModule = state.right;
-    windowRef.dispatchEvent(new Event('resize'));
+    const detail = Object.freeze({ ...state });
+    onModulesChanged?.(detail);
+    windowRef.dispatchEvent(createModuleChangeEvent(windowRef, detail));
+    scheduleResizeFrames(windowRef);
   }
 
   leftSelect.addEventListener('change', () => {

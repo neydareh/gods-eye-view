@@ -2,6 +2,107 @@ import * as Cesium from 'cesium';
 
 const PINCH_ZOOM_MULTIPLIER = 8;
 const MAX_PINCH_PIXEL_DELTA = 120;
+const PERFORMANCE_STORAGE_KEY = 'gev:performance-mode';
+
+function envValue(name) {
+  return import.meta.env?.[name];
+}
+
+function storageValue(key) {
+  try {
+    return globalThis.localStorage?.getItem(key) || '';
+  } catch {
+    return '';
+  }
+}
+
+function normalizeMode(value) {
+  const mode = String(value || '')
+    .trim()
+    .toLowerCase();
+  return ['quality', 'balanced', 'performance'].includes(mode) ? mode : '';
+}
+
+function defaultPerformanceMode() {
+  const navigatorRef = globalThis.navigator;
+  const memory = Number(navigatorRef?.deviceMemory);
+  const cores = Number(navigatorRef?.hardwareConcurrency);
+  if ((Number.isFinite(memory) && memory <= 4) || (cores && cores <= 4))
+    return 'balanced';
+  return 'quality';
+}
+
+function boolValue(value, fallback) {
+  const normalized = String(value || '')
+    .trim()
+    .toLowerCase();
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) return true;
+  if (['0', 'false', 'no', 'off'].includes(normalized)) return false;
+  return fallback;
+}
+
+function numberValue(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : fallback;
+}
+
+export function resolveViewerPerformanceOptions({
+  env = envValue,
+  storage = storageValue,
+  mode = normalizeMode(env('VITE_GEV_PERFORMANCE_MODE')) ||
+    normalizeMode(storage(PERFORMANCE_STORAGE_KEY)) ||
+    defaultPerformanceMode(),
+} = {}) {
+  const presets = {
+    quality: {
+      mode: 'quality',
+      msaaSamples: 4,
+      preserveDrawingBuffer: true,
+      resolutionScale: 1,
+      targetFrameRate: 120,
+    },
+    balanced: {
+      mode: 'balanced',
+      msaaSamples: 2,
+      preserveDrawingBuffer: true,
+      resolutionScale: 0.9,
+      targetFrameRate: 120,
+    },
+    performance: {
+      mode: 'performance',
+      msaaSamples: 1,
+      preserveDrawingBuffer: false,
+      resolutionScale: 0.75,
+      targetFrameRate: 120,
+    },
+  };
+  const base = presets[mode] || presets.quality;
+  return {
+    ...base,
+    msaaSamples: numberValue(env('VITE_GEV_MSAA_SAMPLES'), base.msaaSamples),
+    preserveDrawingBuffer: boolValue(
+      env('VITE_GEV_PRESERVE_DRAWING_BUFFER'),
+      base.preserveDrawingBuffer,
+    ),
+    resolutionScale: numberValue(
+      env('VITE_GEV_RESOLUTION_SCALE'),
+      base.resolutionScale,
+    ),
+    targetFrameRate: numberValue(
+      env('VITE_GEV_TARGET_FRAME_RATE'),
+      base.targetFrameRate,
+    ),
+  };
+}
+
+export function applyViewerSmoothness(viewer) {
+  const controller = viewer?.scene?.screenSpaceCameraController;
+  if (!controller) return;
+  controller.inertiaSpin = 0.92;
+  controller.inertiaTranslate = 0.92;
+  controller.inertiaZoom = 0.86;
+  controller.maximumMovementRatio = 0.07;
+}
 
 function boundedPinchDelta(delta) {
   if (!Number.isFinite(delta) || delta === 0) return delta;
@@ -105,6 +206,7 @@ export function installTrackpadPinchZoom(
 export function createApplicationViewer({ container, creditContainer }) {
   if (!container || !creditContainer)
     throw new TypeError('Viewer and credit containers are required');
+  const performanceOptions = resolveViewerPerformanceOptions();
   const viewer = new Cesium.Viewer(container, {
     timeline: false,
     animation: false,
@@ -119,11 +221,17 @@ export function createApplicationViewer({ container, creditContainer }) {
     infoBox: false,
     baseLayer: false,
     creditContainer,
-    msaaSamples: 4,
-    contextOptions: { webgl: { preserveDrawingBuffer: true } },
+    msaaSamples: performanceOptions.msaaSamples,
+    contextOptions: {
+      webgl: {
+        preserveDrawingBuffer: performanceOptions.preserveDrawingBuffer,
+      },
+    },
   });
   try {
-    viewer.targetFrameRate = 60;
+    viewer.targetFrameRate = performanceOptions.targetFrameRate;
+    viewer.resolutionScale = performanceOptions.resolutionScale;
+    applyViewerSmoothness(viewer);
     viewer.scene.globe.show = false;
     viewer.scene.skyAtmosphere.show = true;
     viewer.scene.skyAtmosphere.atmosphereLightIntensity = 18;

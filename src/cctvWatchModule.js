@@ -1,3 +1,5 @@
+const OPTION_RENDER_LIMIT = 80;
+
 function cameraFrameUrl(camera) {
   const params = new URLSearchParams({
     label: camera.name || camera.id,
@@ -34,6 +36,7 @@ function reportPayload(camera) {
 }
 
 function searchTextForCamera(camera) {
+  if (camera._cctvWatchSearchText) return camera._cctvWatchSearchText;
   return [
     camera.id,
     camera.name,
@@ -58,6 +61,13 @@ function filterCameras(cameras, query) {
     const haystack = searchTextForCamera(camera);
     return terms.every((term) => haystack.includes(term));
   });
+}
+
+function normalizeCamera(camera) {
+  return {
+    ...camera,
+    _cctvWatchSearchText: searchTextForCamera(camera),
+  };
 }
 
 export function initializeCctvWatchModule({
@@ -110,25 +120,31 @@ export function initializeCctvWatchModule({
       elements.options.replaceChildren(empty);
       return;
     }
-    elements.options.replaceChildren(
-      ...filteredCameras.map((camera) => {
-        const option = documentRef.createElement('button');
-        option.type = 'button';
-        option.className = 'cctv-watch-option';
-        option.setAttribute('role', 'option');
-        option.setAttribute(
-          'aria-selected',
-          String(camera.id === selectedCamera?.id),
-        );
-        const name = documentRef.createElement('strong');
-        name.textContent = camera.name || camera.id;
-        const meta = documentRef.createElement('span');
-        meta.textContent = `${camera.city || 'Global'} · ${camera.provider || 'Unknown provider'}`;
-        option.append(name, meta);
-        option.addEventListener('click', () => selectCamera(camera.id));
-        return option;
-      }),
-    );
+    const visibleCameras = filteredCameras.slice(0, OPTION_RENDER_LIMIT);
+    const optionNodes = visibleCameras.map((camera) => {
+      const option = documentRef.createElement('button');
+      option.type = 'button';
+      option.className = 'cctv-watch-option';
+      option.setAttribute('role', 'option');
+      option.setAttribute(
+        'aria-selected',
+        String(camera.id === selectedCamera?.id),
+      );
+      const name = documentRef.createElement('strong');
+      name.textContent = camera.name || camera.id;
+      const meta = documentRef.createElement('span');
+      meta.textContent = `${camera.city || 'Global'} · ${camera.provider || 'Unknown provider'}`;
+      option.append(name, meta);
+      option.addEventListener('click', () => selectCamera(camera.id));
+      return option;
+    });
+    if (filteredCameras.length > OPTION_RENDER_LIMIT) {
+      const more = documentRef.createElement('div');
+      more.className = 'cctv-watch-option-empty';
+      more.textContent = `${filteredCameras.length - OPTION_RENDER_LIMIT} more matches. Keep typing to narrow.`;
+      optionNodes.push(more);
+    }
+    elements.options.replaceChildren(...optionNodes);
   }
 
   function syncComboValue() {
@@ -208,7 +224,9 @@ export function initializeCctvWatchModule({
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const payload = await response.json();
-      cameras = Array.isArray(payload?.sources) ? payload.sources : [];
+      cameras = Array.isArray(payload?.sources)
+        ? payload.sources.map(normalizeCamera)
+        : [];
       filteredCameras = cameras;
       if (elements.combo) elements.combo.disabled = cameras.length === 0;
       setStatus(`${cameras.length} cameras available`);

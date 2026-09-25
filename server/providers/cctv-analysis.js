@@ -1,102 +1,45 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import {
+  cctvAnalysisFetchHandler,
+  cctvAnalysisScanHandler,
+} from './cctv-analysis/http.js';
 
-const MAX_REPORT_BYTES = 128 * 1024;
+const REPORTS_PATH = '/api/cctv-analysis/reports';
+const SCAN_PATH = '/api/cctv-analysis/scan';
+const REPORTS_URL = `http://local.invalid${REPORTS_PATH}`;
+const SCAN_URL = `http://local.invalid${SCAN_PATH}`;
 
-function readRequestBody(req, maxBytes = MAX_REPORT_BYTES) {
+function nodeRequestToFetchRequest(req, url) {
   return new Promise((resolve, reject) => {
-    let body = '';
+    const chunks = [];
     req.setEncoding('utf8');
     req.on('data', (chunk) => {
-      body += chunk;
-      if (body.length > maxBytes) {
-        reject(new Error('Report body too large'));
-        req.destroy();
-      }
+      chunks.push(chunk);
     });
-    req.on('end', () => resolve(body));
+    req.on('end', () => {
+      resolve(
+        new Request(url, {
+          method: req.method,
+          headers: req.headers,
+          body: chunks.join(''),
+        }),
+      );
+    });
     req.on('error', reject);
   });
 }
 
-function reportFilePath(sourceRoot) {
-  const configured = process.env.CCTV_ANALYSIS_REPORT_FILE;
-  if (configured) {
-    return path.isAbsolute(configured)
-      ? configured
-      : path.resolve(sourceRoot, configured);
-  }
-  return path.resolve(sourceRoot, 'data/cctv-analysis-reports.json');
-}
-
-function safeReport(input) {
-  const now = new Date().toISOString();
-  return {
-    schemaVersion: 1,
-    receivedAt: now,
-    module: 'cctv-watch',
-    cameraId: String(input?.cameraId || ''),
-    cameraName: String(input?.cameraName || input?.cameraId || ''),
-    provider: String(input?.provider || ''),
-    city: String(input?.city || ''),
-    capturedAt: String(input?.capturedAt || now),
-    model: {
-      kind: 'yolo',
-      status: String(input?.model?.status || 'not_configured'),
-    },
-    detections: Array.isArray(input?.detections) ? input.detections : [],
-    suspiciousBehaviors: Array.isArray(input?.suspiciousBehaviors)
-      ? input.suspiciousBehaviors
-      : [],
-    notes: Array.isArray(input?.notes) ? input.notes.map(String) : [],
-  };
-}
-
-async function appendReport(file, report) {
-  await fs.mkdir(path.dirname(file), { recursive: true });
-  let existing = [];
-  try {
-    const raw = await fs.readFile(file, 'utf8');
-    const parsed = JSON.parse(raw);
-    existing = Array.isArray(parsed?.reports) ? parsed.reports : [];
-  } catch (error) {
-    if (error?.code !== 'ENOENT') throw error;
-  }
-  existing.push(report);
-  await fs.writeFile(
-    file,
-    JSON.stringify({ schemaVersion: 1, reports: existing }, null, 2) + '\n',
-  );
+function writeNodeResponse(res, result) {
+  res.writeHead(result.status, result.headers);
+  res.end(result.body);
 }
 
 export function cctvAnalysisProxy({ sourceRoot = process.cwd() } = {}) {
-  const file = reportFilePath(sourceRoot);
-
   const install = ({ middlewares }) => {
-    middlewares.use('/api/cctv-analysis/reports', async (req, res) => {
+    const handle = (url, handler) => async (req, res) => {
       try {
-        if (req.method !== 'POST') {
-          res.writeHead(405, {
-            'Content-Type': 'application/json',
-            Allow: 'POST',
-          });
-          res.end(JSON.stringify({ error: 'method_not_allowed' }));
-          return;
-        }
-        const body = await readRequestBody(req);
-        const parsed = JSON.parse(body || '{}');
-        const report = safeReport(parsed);
-        if (!report.cameraId) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'camera_required' }));
-          return;
-        }
-        await appendReport(file, report);
-        res.writeHead(200, {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-store',
-        });
-        res.end(JSON.stringify({ ok: true, file }));
+        const request = await nodeRequestToFetchRequest(req, url);
+        const result = await handler(request, { sourceRoot });
+        writeNodeResponse(res, result);
       } catch (error) {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(
@@ -106,7 +49,13 @@ export function cctvAnalysisProxy({ sourceRoot = process.cwd() } = {}) {
           }),
         );
       }
-    });
+    };
+
+    middlewares.use(
+      REPORTS_PATH,
+      handle(REPORTS_URL, cctvAnalysisFetchHandler),
+    );
+    middlewares.use(SCAN_PATH, handle(SCAN_URL, cctvAnalysisScanHandler));
   };
 
   return {

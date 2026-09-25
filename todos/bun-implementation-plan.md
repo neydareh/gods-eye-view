@@ -1,5 +1,33 @@
 # Bun Implementation Plan
 
+## Status
+
+- Phase 1 (Compatibility Audit): done — see Evidence below.
+- Phase 2 (Bun CCTV Analysis Service): done — `server/bun/cctv-analysis-service.js` implements the report contract; Node/Vite middleware in `server/providers/cctv-analysis.js` remains as fallback.
+- Phase 3 (YOLO Runtime Orchestration): scaffold done — `POST /api/cctv-analysis/scan` returns the final schema with an honest `model_unavailable` status until a YOLO runtime is wired. Detection normalization and deterministic behavior rules live in `server/providers/cctv-analysis/rules.js`, separate from raw detections. Real YOLO runtime: not started.
+- Phase 4 (Provider Middleware Trial): not started.
+- Phase 5 (Optional Tooling Adoption): partially exercised — `bun run build` and `bun test` verified for the CCTV analysis module only; Node remains the default test runner.
+
+## Evidence
+
+Verified on 2026-09-24 with Bun 1.3.14 (Node emulation 24.3.0) on macOS:
+
+- `bun install --dry-run` resolves the full dependency graph from `package.json` without errors. No `bun.lockb` was committed; npm's `package-lock.json` stays authoritative.
+- `bun run build` (Vite 6 + `vite-plugin-cesium` + Cesium 1.124) completes successfully (`✓ built in 3.77s`), same chunk layout as Node.
+- `bun test src/cctvAnalysisService.test.mjs`: 2 pass / 0 fail. Identical tests under `node --test`: 2 pass / 0 fail. No Bun-only failures.
+- Allocation-budget tests (`src/data/focusAllocations.test.mjs`, `src/overlays/worldOverlayAllocation.test.mjs`) were not run under Bun — `scripts/run-unit-tests.mjs` requires the calibrated Node 24 runtime for those, per plan.
+- Live smoke test of `bun server/bun/cctv-analysis-service.js` (port 4174):
+  - `POST /api/cctv-analysis/reports` → `200 {"ok":true,...}`, report appended to `data/cctv-analysis-reports.json` shape with `schemaVersion: 1`, `module: "cctv-watch"`, `model.kind: "yolo"`.
+  - `GET /api/cctv-analysis/reports` → `405`.
+  - Malformed body → `400 {"error":"malformed_json"}`.
+  - Unknown path → `404 {"error":"not_found"}`.
+  - `POST /api/cctv-analysis/scan` → `200` with `status: "model_unavailable"`, empty `detections`/`tracks`/`events`/`suspiciousBehaviors`, `assessment: null`.
+  - `POST /api/cctv-analysis/scan` without camera → `400 {"error":"camera_required"}`.
+  - `GET /api/cctv-analysis/scan` → `405`.
+- Unit tests (`src/cctvAnalysisService.test.mjs`, 6 tests incl. scan contract + behavior rules): 6 pass under `bun test`, 6 pass under `node --test`.
+- `bun install` generated a `bun.lock` during the audit; it was removed — npm's `package-lock.json` stays the single authoritative lockfile until a Bun-first dependency decision is made.
+- No incompatible scripts, dependencies, or APIs found within the audited scope (install, Vite build, CCTV analysis module).
+
 ## Goal
 
 Use Bun where it fits this app without rewriting the Cesium browser experience. Keep the current Vite/Cesium frontend as the source of truth, and evaluate Bun for faster local runtime, provider APIs, CCTV analysis, and development tooling.

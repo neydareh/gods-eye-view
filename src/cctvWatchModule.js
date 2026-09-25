@@ -14,7 +14,8 @@ function cameraFrameUrl(camera) {
   return `/api/cctv/frame/${encodeURIComponent(camera.id)}?${params.toString()}`;
 }
 
-function reportPayload(camera) {
+function reportPayload(camera, scan) {
+  const modelRan = scan?.status === 'ok';
   return {
     schemaVersion: 1,
     module: 'cctv-watch',
@@ -25,13 +26,22 @@ function reportPayload(camera) {
     capturedAt: new Date().toISOString(),
     model: {
       kind: 'yolo',
-      status: 'not_configured',
+      status: modelRan
+        ? 'running'
+        : scan
+          ? scan.model?.status || 'not_configured'
+          : 'not_configured',
     },
-    detections: [],
-    suspiciousBehaviors: [],
-    notes: [
-      'Scaffold report only. Wire a YOLO runtime before treating this as analysis.',
-    ],
+    detections: modelRan ? scan.detections || [] : [],
+    suspiciousBehaviors: modelRan ? scan.suspiciousBehaviors || [] : [],
+    scanStatus: scan?.status || 'not_run',
+    notes: modelRan
+      ? ['Report generated from a completed YOLO scan.']
+      : [
+          scan
+            ? 'Scan returned no detections: YOLO model did not run.'
+            : 'No scan has run. Wire a YOLO runtime before treating this as analysis.',
+        ],
   };
 }
 
@@ -88,12 +98,14 @@ export function initializeCctvWatchModule({
     title: documentRef.getElementById('cctv-watch-title'),
     meta: documentRef.getElementById('cctv-watch-meta'),
     analyze: documentRef.getElementById('cctv-watch-analyze'),
+    saveReport: documentRef.getElementById('cctv-watch-save-report'),
     report: documentRef.getElementById('cctv-watch-report'),
   };
 
   let cameras = [];
   let filteredCameras = [];
   let selectedCamera = null;
+  let lastScan = null;
 
   function setStatus(text) {
     if (elements.status) elements.status.textContent = text;
@@ -155,6 +167,7 @@ export function initializeCctvWatchModule({
 
   function clearSelectedCamera() {
     selectedCamera = null;
+    lastScan = null;
     syncComboValue();
     renderOptions();
     setOptionsOpen(false);
@@ -166,6 +179,7 @@ export function initializeCctvWatchModule({
     elements.title.textContent = 'Camera detail';
     elements.meta.textContent = 'Choose a camera to prepare analysis.';
     elements.analyze.disabled = true;
+    if (elements.saveReport) elements.saveReport.disabled = true;
     elements.report.textContent = 'YOLO scaffold idle.';
   }
 
@@ -195,6 +209,7 @@ export function initializeCctvWatchModule({
       clearSelectedCamera();
       return;
     }
+    lastScan = null;
     filteredCameras = filterCameras(cameras, cameraLabel(selectedCamera));
     syncComboValue();
     renderOptions();
@@ -211,8 +226,9 @@ export function initializeCctvWatchModule({
       selectedCamera.sourceKind || 'source',
     ].join(' · ');
     elements.analyze.disabled = false;
+    if (elements.saveReport) elements.saveReport.disabled = true;
     elements.report.textContent =
-      'YOLO scaffold ready. Run scan to write a placeholder report.';
+      'YOLO scaffold ready. Run scan to analyze this feed.';
   }
 
   async function loadCameras() {
@@ -243,10 +259,45 @@ export function initializeCctvWatchModule({
     }
   }
 
+  async function runScan() {
+    if (!selectedCamera) return;
+    elements.analyze.disabled = true;
+    if (elements.saveReport) elements.saveReport.disabled = true;
+    elements.report.textContent = 'Scan running…';
+    try {
+      const response = await fetchImpl('/api/cctv-analysis/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cameraId: selectedCamera.id,
+          mode: 'single',
+          frameUrl: cameraFrameUrl(selectedCamera),
+        }),
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const scan = await response.json();
+      lastScan = scan;
+      if (scan.status === 'model_unavailable') {
+        elements.report.textContent =
+          'Model unavailable: YOLO is not configured on this server. No detections were produced.';
+      } else if (scan.status === 'ok') {
+        elements.report.textContent = JSON.stringify(scan, null, 2);
+      } else {
+        elements.report.textContent = `Scan finished with unknown status: ${scan.status || 'none'}`;
+      }
+      if (elements.saveReport) elements.saveReport.disabled = false;
+    } catch (error) {
+      lastScan = null;
+      elements.report.textContent = `Scan failed: ${error?.message || error}`;
+    } finally {
+      elements.analyze.disabled = false;
+    }
+  }
+
   async function writeReport() {
     if (!selectedCamera) return;
-    const payload = reportPayload(selectedCamera);
-    elements.analyze.disabled = true;
+    const payload = reportPayload(selectedCamera, lastScan);
+    if (elements.saveReport) elements.saveReport.disabled = true;
     elements.report.textContent = JSON.stringify(payload, null, 2);
     try {
       const response = await fetchImpl('/api/cctv-analysis/reports', {
@@ -268,7 +319,7 @@ export function initializeCctvWatchModule({
         2,
       );
     } finally {
-      elements.analyze.disabled = false;
+      if (elements.saveReport) elements.saveReport.disabled = false;
     }
   }
 
@@ -289,17 +340,21 @@ export function initializeCctvWatchModule({
   documentRef.addEventListener?.('click', (event) => {
     if (!root.contains(event.target)) setOptionsOpen(false);
   });
-  elements.analyze?.addEventListener('click', writeReport);
+  elements.analyze?.addEventListener('click', runScan);
+  elements.saveReport?.addEventListener('click', writeReport);
   void loadCameras();
 
   return Object.freeze({
     loadCameras,
     selectCamera,
+    runScan,
+    writeReport,
     getState: () =>
       Object.freeze({
         cameraCount: cameras.length,
         filteredCameraCount: filteredCameras.length,
         selectedCameraId: selectedCamera?.id || null,
+        lastScanStatus: lastScan?.status || null,
       }),
   });
 }

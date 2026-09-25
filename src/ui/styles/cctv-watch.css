@@ -216,6 +216,13 @@
   min-width: 0;
 }
 
+.cctv-watch-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
 .cctv-watch-detail h3,
 .cctv-watch-detail p {
   overflow: hidden;

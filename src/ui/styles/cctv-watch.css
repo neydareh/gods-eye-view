@@ -190,7 +190,8 @@
   opacity: 0.24;
 }
 
-#cctv-watch-frame {
+#cctv-watch-frame,
+#cctv-watch-video {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -251,6 +252,48 @@
   white-space: pre-wrap;
 }
 
+.cctv-watch-analysis {
+  min-height: 0;
+  overflow: auto;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 12px 14px;
+}
+
+.cctv-watch-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cctv-watch-summary strong,
+.cctv-watch-summary span,
+#cctv-watch-assessment,
+#cctv-watch-events,
+#cctv-watch-history {
+  font: 600 11px/1.45 var(--font-mono);
+}
+
+.cctv-watch-summary strong[data-level='normal'] { color: #91d7a3; }
+.cctv-watch-summary strong[data-level='watch'] { color: #f0d36d; }
+.cctv-watch-summary strong[data-level='elevated'],
+.cctv-watch-summary strong[data-level='critical_review'] { color: #ff927e; }
+.cctv-watch-summary span,
+#cctv-watch-assessment { color: var(--text-secondary); }
+#cctv-watch-assessment { margin: 0; }
+
+#cctv-watch-events,
+#cctv-watch-detections,
+#cctv-watch-evidence,
+#cctv-watch-history { margin: 0; padding-left: 18px; color: var(--text-primary); }
+
+.cctv-watch-review-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.cctv-watch-review-actions button { padding: 7px 9px; }
+.cctv-watch-analysis h4 { margin: 2px 0 0; font: 700 10px var(--font-mono); color: var(--text-secondary); }
+.cctv-watch-analysis .cctv-watch-report { max-height: 180px; }
+
 @media (max-width: 720px) {
   .cctv-watch-grid {
     grid-template-columns: 1fr;
@@ -258,6 +301,6 @@
   }
 
   .cctv-watch-detail {
-    grid-template-rows: minmax(180px, 1fr) auto minmax(110px, 0.38fr);
+    grid-template-rows: minmax(180px, 1fr) auto minmax(0, 0.8fr);
   }
 }

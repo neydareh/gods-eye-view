@@ -6,8 +6,11 @@ import assert from 'node:assert/strict';
 import {
   cctvAnalysisFetchHandler,
   cctvAnalysisScanHandler,
+  cctvHumanReviewHandler,
 } from '../server/providers/cctv-analysis/http.js';
 import {
+  assessEvents,
+  buildAnalysisEvents,
   evaluateSuspiciousBehaviors,
   normalizeDetectionTick,
 } from '../server/providers/cctv-analysis/rules.js';
@@ -75,7 +78,7 @@ test('CCTV analysis service rejects missing camera IDs, malformed JSON, large re
   assert.equal(JSON.parse(tooLarge.body).error, 'report_too_large');
 
   const wrongMethod = await cctvAnalysisFetchHandler(
-    reportRequest(undefined, 'GET'),
+    reportRequest(undefined, 'PATCH'),
     { sourceRoot: root },
   );
   assert.equal(wrongMethod.status, 405);
@@ -108,6 +111,33 @@ test('scan endpoint reports model_unavailable without inventing detections', asy
   assert.equal(payload.assessment, null);
 });
 
+test('live scan forwards a validated browser-captured frame to the runtime', async () => {
+  const image = Buffer.from('jpeg-frame');
+  let received;
+  const result = await cctvAnalysisScanHandler(
+    scanRequest(
+      JSON.stringify({
+        cameraId: 'cam-1',
+        mode: 'live',
+        frameData: `data:image/jpeg;base64,${image.toString('base64')}`,
+      }),
+    ),
+    {
+      runtime: {
+        async analyze(cameraId, frameBytes) {
+          received = { cameraId, frameBytes };
+          return { detections: [], model: { kind: 'yolo', status: 'running' } };
+        },
+      },
+    },
+  );
+
+  assert.equal(result.status, 200);
+  assert.equal(JSON.parse(result.body).status, 'ok');
+  assert.equal(received.cameraId, 'cam-1');
+  assert.deepEqual(received.frameBytes, image);
+});
+
 test('scan endpoint rejects missing cameras, malformed JSON, oversized bodies, and wrong methods', async () => {
   const missingCamera = await cctvAnalysisScanHandler(
     scanRequest(JSON.stringify({ cameraId: '' })),
@@ -126,9 +156,85 @@ test('scan endpoint rejects missing cameras, malformed JSON, oversized bodies, a
   assert.equal(tooLarge.status, 413);
   assert.equal(JSON.parse(tooLarge.body).error, 'scan_too_large');
 
-  const wrongMethod = await cctvAnalysisScanHandler(scanRequest(undefined, 'GET'));
+  const wrongMethod = await cctvAnalysisScanHandler(
+    scanRequest(undefined, 'GET'),
+  );
   assert.equal(wrongMethod.status, 405);
   assert.equal(JSON.parse(wrongMethod.body).error, 'method_not_allowed');
+});
+
+test('report listing paginates and human reviews append separately', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'gev-cctv-review-'));
+  const saved = await cctvAnalysisFetchHandler(
+    reportRequest(
+      JSON.stringify({
+        cameraId: 'cam-review',
+        cameraName: 'Review camera',
+        assessment: {
+          threatLevel: 'elevated',
+          score: 65,
+          confidence: 0.8,
+          summary: 'Review observed evidence.',
+          evidence: ['Observed object left behind'],
+          recommendedAction: 'Review feed.',
+          requiresHumanReview: true,
+          finalDecision: null,
+          reviewedBy: null,
+          reviewedAt: null,
+        },
+      }),
+    ),
+    { sourceRoot: root },
+  );
+  const reportId = JSON.parse(saved.body).reportId;
+  const reviewed = await cctvHumanReviewHandler(
+    new Request('http://local.invalid/api/cctv-analysis/reviews', {
+      method: 'POST',
+      body: JSON.stringify({
+        reportId,
+        decision: 'confirm',
+        reviewedBy: 'operator-1',
+      }),
+    }),
+    { sourceRoot: root },
+  );
+  assert.equal(reviewed.status, 200);
+  assert.equal(JSON.parse(reviewed.body).review.status, 'confirmed');
+
+  const listed = await cctvAnalysisFetchHandler(
+    new Request(
+      'http://local.invalid/api/cctv-analysis/reports?limit=1&cameraId=cam-review',
+    ),
+    { sourceRoot: root },
+  );
+  const result = JSON.parse(listed.body);
+  assert.equal(result.total, 1);
+  assert.equal(result.reports[0].humanReview.status, 'confirmed');
+  assert.equal(result.reports[0].assessment.finalDecision, null);
+});
+
+test('critical review events require a human and never set a final decision', () => {
+  const capturedAt = '2026-09-24T12:00:00.000Z';
+  const events = buildAnalysisEvents(
+    [
+      {
+        capturedAt,
+        detections: [
+          {
+            label: 'weapon',
+            confidence: 0.63,
+            box: { x: 0.2, y: 0.2, w: 0.1, h: 0.2 },
+            timestamp: capturedAt,
+          },
+        ],
+      },
+    ],
+    'cam-review',
+  );
+  const assessment = assessEvents(events);
+  assert.equal(assessment.threatLevel, 'critical_review');
+  assert.equal(assessment.requiresHumanReview, true);
+  assert.equal(assessment.finalDecision, null);
 });
 
 test('behavior rules stay separate from detections and flag suspicious patterns', () => {
@@ -209,20 +315,44 @@ test('behavior rules stay separate from detections and flag suspicious patterns'
       {
         capturedAt: at(0),
         detections: [
-          { trackId: 'b1', label: 'bag', confidence: 0.7, box: base, timestamp: at(0) },
-          { trackId: 'p1', label: 'person', confidence: 0.9, box: base, timestamp: at(0) },
+          {
+            trackId: 'b1',
+            label: 'bag',
+            confidence: 0.7,
+            box: base,
+            timestamp: at(0),
+          },
+          {
+            trackId: 'p1',
+            label: 'person',
+            confidence: 0.9,
+            box: base,
+            timestamp: at(0),
+          },
         ],
       },
       {
         capturedAt: at(70),
         detections: [
-          { trackId: 'b1', label: 'bag', confidence: 0.7, box: base, timestamp: at(70) },
+          {
+            trackId: 'b1',
+            label: 'bag',
+            confidence: 0.7,
+            box: base,
+            timestamp: at(70),
+          },
         ],
       },
       {
         capturedAt: at(150),
         detections: [
-          { trackId: 'b1', label: 'bag', confidence: 0.7, box: base, timestamp: at(150) },
+          {
+            trackId: 'b1',
+            label: 'bag',
+            confidence: 0.7,
+            box: base,
+            timestamp: at(150),
+          },
         ],
       },
     ],
@@ -236,7 +366,11 @@ test('detection normalization clamps boxes and fills camera context', () => {
     {
       capturedAt: '2026-09-24T12:00:00.000Z',
       detections: [
-        { label: ' PERSON ', confidence: 1.7, box: { x: -0.2, y: 0.1, w: 3, h: 0.4 } },
+        {
+          label: ' PERSON ',
+          confidence: 1.7,
+          box: { x: -0.2, y: 0.1, w: 3, h: 0.4 },
+        },
       ],
     },
     'cam-9',

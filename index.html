@@ -1,119 +1,236 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>God's Eye View</title>
-  <link rel="icon" type="image/svg+xml" href="/logo.svg" />
-  <link rel="stylesheet" href="/style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <!-- Icon font subset to the glyphs this app renders. Keep `icon_names` in sync
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>God's Eye View</title>
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Icon font subset to the glyphs this app renders. Keep `icon_names` in sync
        with the sources: src/materialSymbolsSubset.test.mjs fails when a source
        names a glyph this list is missing, because a missing glyph does not draw
        a box — the ligature never forms and the element renders the literal word. -->
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&icon_names=adjust,arrow_drop_down,arrow_forward,arrow_left,arrow_right,bolt,chevron_left,chevron_right,close,close_fullscreen,dark_mode,draw,east,flare,flight,layers_clear,light_mode,local_fire_department,my_location,navigation,normal,on,open_in_full,public,radar,radio,right_panel_close,right_panel_open,rocket_launch,skip_next,skip_previous,view_in_ar" rel="stylesheet" />
-</head>
-<body>
-  <main id="parent-app-shell" class="parent-app-shell" aria-label="Application modules">
-    <header class="parent-app-topbar">
-      <div class="parent-app-brand">
-        <span class="parent-app-logo brand-logo" data-logo-gaze data-logo-src="/logo.svg" aria-hidden="true"><img src="/logo.svg" alt="" /></span>
-        <span>
-          <strong>GOD'S EYE VIEW</strong>
-          <small>MODULE COMMAND</small>
-        </span>
-      </div>
-      <div class="parent-app-layout-controls" aria-label="Module layout">
-        <label>
-          <span>LEFT</span>
-          <select id="left-module-select" aria-label="Left module"></select>
-        </label>
-        <label>
-          <span>RIGHT</span>
-          <select id="right-module-select" aria-label="Right module"></select>
-        </label>
-      </div>
-    </header>
-
-    <section class="parent-app-split" aria-label="Split module workspace">
-      <section id="left-module-pane" class="module-pane module-pane-left" aria-label="Left module"></section>
-      <section id="right-module-pane" class="module-pane module-pane-right" aria-label="Right module"></section>
-    </section>
-  </main>
-
-  <section id="god-eye-module" class="module-surface god-eye-module" aria-label="God Eye application">
-    <!-- gev:template scene-chrome -->
-
-    <!-- gev:template cockpit -->
-
-    <!-- gev:template display-controls -->
-
-    <!-- gev:template command-dock -->
-
-    <!-- gev:template layer-panels -->
-
-    <!-- gev:template context -->
-
-    <!-- gev:template welcome -->
-
-    <!-- gev:template provider-settings -->
-
-    <!-- gev:template hud-loading -->
-  </section>
-
-  <section id="coming-soon-module" class="module-surface coming-soon-module" aria-label="Coming soon module">
-    <div class="coming-soon-panel">
-      <span class="coming-soon-kicker">MODULE 02</span>
-      <h2>COMING SOON</h2>
-      <p>Reserved for the next sub-app.</p>
-      <div class="coming-soon-readout" aria-hidden="true">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-    </div>
-  </section>
-
-  <section id="cctv-watch-module" class="module-surface cctv-watch-module" aria-label="CCTV watch module">
-    <header class="cctv-watch-header">
-      <div>
-        <span>CCTV WATCH</span>
-        <h2>Camera Intelligence</h2>
-      </div>
-      <button id="cctv-watch-refresh" type="button">REFRESH</button>
-    </header>
-    <div class="cctv-watch-grid">
-      <aside class="cctv-watch-list-panel">
-        <div class="cctv-watch-list-status" id="cctv-watch-list-status" role="status" aria-live="polite">Loading cameras</div>
-        <label class="cctv-watch-selector cctv-watch-combobox">
-          <span>CAMERA FEED</span>
-          <input id="cctv-watch-camera-combobox" type="search" placeholder="Search or select a camera feed..." autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="cctv-watch-camera-options" aria-label="Search or select CCTV camera feed" disabled />
-          <div id="cctv-watch-camera-options" class="cctv-watch-options" role="listbox" hidden></div>
-        </label>
-      </aside>
-      <section class="cctv-watch-detail" aria-labelledby="cctv-watch-title">
-        <div class="cctv-watch-frame-wrap">
-          <img id="cctv-watch-frame" alt="" hidden />
-          <div id="cctv-watch-empty" class="cctv-watch-empty">Select a camera feed</div>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&icon_names=adjust,arrow_drop_down,arrow_forward,arrow_left,arrow_right,bolt,chevron_left,chevron_right,close,close_fullscreen,dark_mode,draw,east,flare,flight,layers_clear,light_mode,local_fire_department,my_location,navigation,normal,on,open_in_full,public,radar,radio,right_panel_close,right_panel_open,rocket_launch,skip_next,skip_previous,view_in_ar"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <main
+      id="parent-app-shell"
+      class="parent-app-shell"
+      aria-label="Application modules"
+    >
+      <header class="parent-app-topbar">
+        <div class="parent-app-brand">
+          <span
+            class="parent-app-logo brand-logo"
+            data-logo-gaze
+            data-logo-src="/logo.svg"
+            aria-hidden="true"
+            ><img src="/logo.svg" alt=""
+          /></span>
+          <span>
+            <strong>GOD'S EYE VIEW</strong>
+            <small>MODULE COMMAND</small>
+          </span>
         </div>
-        <div class="cctv-watch-detail-body">
-          <div>
-            <span id="cctv-watch-provider" class="cctv-watch-kicker">NO FEED SELECTED</span>
-            <h3 id="cctv-watch-title">Camera detail</h3>
-            <p id="cctv-watch-meta">Choose a camera to prepare analysis.</p>
-          </div>
-          <div class="cctv-watch-actions">
-            <button id="cctv-watch-analyze" type="button" disabled>RUN SCAN</button>
-            <button id="cctv-watch-save-report" type="button" disabled>SAVE REPORT</button>
-          </div>
+        <div class="parent-app-layout-controls" aria-label="Module layout">
+          <label>
+            <span>LEFT</span>
+            <select id="left-module-select" aria-label="Left module"></select>
+          </label>
+          <label>
+            <span>RIGHT</span>
+            <select id="right-module-select" aria-label="Right module"></select>
+          </label>
         </div>
-        <pre id="cctv-watch-report" class="cctv-watch-report" aria-live="polite">YOLO scaffold idle.</pre>
+      </header>
+
+      <section class="parent-app-split" aria-label="Split module workspace">
+        <section
+          id="left-module-pane"
+          class="module-pane module-pane-left"
+          aria-label="Left module"
+        ></section>
+        <section
+          id="right-module-pane"
+          class="module-pane module-pane-right"
+          aria-label="Right module"
+        ></section>
       </section>
-    </div>
-  </section>
+    </main>
 
-  <script type="module" src="/src/main.js"></script>
-</body>
+    <section
+      id="god-eye-module"
+      class="module-surface god-eye-module"
+      aria-label="God Eye application"
+    >
+      <!-- gev:template scene-chrome -->
+
+      <!-- gev:template cockpit -->
+
+      <!-- gev:template display-controls -->
+
+      <!-- gev:template command-dock -->
+
+      <!-- gev:template layer-panels -->
+
+      <!-- gev:template context -->
+
+      <!-- gev:template welcome -->
+
+      <!-- gev:template provider-settings -->
+
+      <!-- gev:template hud-loading -->
+    </section>
+
+    <section
+      id="coming-soon-module"
+      class="module-surface coming-soon-module"
+      aria-label="Coming soon module"
+    >
+      <div class="coming-soon-panel">
+        <span class="coming-soon-kicker">MODULE 02</span>
+        <h2>COMING SOON</h2>
+        <p>Reserved for the next sub-app.</p>
+        <div class="coming-soon-readout" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="cctv-watch-module"
+      class="module-surface cctv-watch-module"
+      aria-label="CCTV watch module"
+    >
+      <header class="cctv-watch-header">
+        <div>
+          <span>CCTV WATCH</span>
+          <h2>Camera Intelligence</h2>
+        </div>
+        <button id="cctv-watch-refresh" type="button">REFRESH</button>
+      </header>
+      <div class="cctv-watch-grid">
+        <aside class="cctv-watch-list-panel">
+          <div
+            class="cctv-watch-list-status"
+            id="cctv-watch-list-status"
+            role="status"
+            aria-live="polite"
+          >
+            Loading cameras
+          </div>
+          <label class="cctv-watch-selector cctv-watch-combobox">
+            <span>CAMERA FEED</span>
+            <input
+              id="cctv-watch-camera-combobox"
+              type="search"
+              placeholder="Search or select a camera feed..."
+              autocomplete="off"
+              spellcheck="false"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded="false"
+              aria-controls="cctv-watch-camera-options"
+              aria-label="Search or select CCTV camera feed"
+              disabled
+            />
+            <div
+              id="cctv-watch-camera-options"
+              class="cctv-watch-options"
+              role="listbox"
+              hidden
+            ></div>
+          </label>
+        </aside>
+        <section class="cctv-watch-detail" aria-labelledby="cctv-watch-title">
+          <div class="cctv-watch-frame-wrap">
+            <img id="cctv-watch-frame" alt="" hidden />
+            <video id="cctv-watch-video" muted playsinline hidden></video>
+            <div id="cctv-watch-empty" class="cctv-watch-empty">
+              Select a camera feed
+            </div>
+          </div>
+          <div class="cctv-watch-detail-body">
+            <div>
+              <span id="cctv-watch-provider" class="cctv-watch-kicker"
+                >NO FEED SELECTED</span
+              >
+              <h3 id="cctv-watch-title">Camera detail</h3>
+              <p id="cctv-watch-meta">Choose a camera to prepare analysis.</p>
+            </div>
+            <div class="cctv-watch-actions">
+              <button
+                id="cctv-watch-analyze"
+                type="button"
+                disabled
+                title="Live analysis starts automatically when a stream is selected"
+              >
+                RUN SCAN
+              </button>
+              <button id="cctv-watch-save-report" type="button" disabled>
+                SAVE REPORT
+              </button>
+            </div>
+          </div>
+          <section class="cctv-watch-analysis" aria-label="Camera analysis">
+            <div class="cctv-watch-summary">
+              <strong id="cctv-watch-threat" data-level="normal"
+                >NO ASSESSMENT</strong
+              >
+              <span id="cctv-watch-review-state"
+                >Select a camera to begin.</span
+              >
+            </div>
+            <p id="cctv-watch-assessment">
+              Analysis is advisory. A human operator makes final decisions.
+            </p>
+            <ul
+              id="cctv-watch-detections"
+              aria-label="Observed detections"
+            ></ul>
+            <ul id="cctv-watch-events" aria-live="polite"></ul>
+            <ul id="cctv-watch-evidence" aria-label="Assessment evidence"></ul>
+            <div
+              class="cctv-watch-review-actions"
+              aria-label="Human review actions"
+            >
+              <button type="button" data-review="confirm" disabled>
+                CONFIRM
+              </button>
+              <button type="button" data-review="dismiss" disabled>
+                DISMISS
+              </button>
+              <button type="button" data-review="escalate" disabled>
+                ESCALATE
+              </button>
+              <button type="button" data-review="needs_more_review" disabled>
+                MORE REVIEW
+              </button>
+            </div>
+            <h4>Recent reports</h4>
+            <ol id="cctv-watch-history"></ol>
+            <pre
+              id="cctv-watch-report"
+              class="cctv-watch-report"
+              aria-live="polite"
+            >
+YOLO scan unavailable until a model is configured.</pre>
+          </section>
+        </section>
+      </div>
+    </section>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
 </html>

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "reviews": [
+    {
+      "schemaVersion": 1,
+      "id": "review_1790348063545_3hyo2j",
+      "reportId": "report_1790347584916_b0gcm6",
+      "status": "needs_more_review",
+      "decision": "needs_more_review",
+      "reviewedBy": "operator",
+      "reviewedAt": "2026-09-25T14:54:23.545Z",
+      "reviewNote": ""
+    },
+    {
+      "schemaVersion": 1,
+      "id": "review_1790348067268_vj0ltr",
+      "reportId": "report_1790347584916_b0gcm6",
+      "status": "confirmed",
+      "decision": "confirm",
+      "reviewedBy": "operator",
+      "reviewedAt": "2026-09-25T14:54:27.268Z",
+      "reviewNote": ""
+    }
+  ]
+}

@@ -38,6 +38,36 @@
       "notes": [
         "Scaffold report only. Wire a YOLO runtime before treating this as analysis."
       ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "report_1790347584916_b0gcm6",
+      "receivedAt": "2026-09-25T14:46:24.916Z",
+      "module": "cctv-watch",
+      "cameraId": "deldot-ncam214",
+      "cameraName": "KING ST @ 10TH ST",
+      "provider": "DelDOT",
+      "city": "New Castle County",
+      "capturedAt": "2026-09-25T14:46:24.914Z",
+      "model": {
+        "kind": "yolo",
+        "status": "not_configured"
+      },
+      "detections": [],
+      "tracks": [],
+      "events": [],
+      "assessment": null,
+      "humanReview": {
+        "status": "not_required",
+        "decision": null,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "reviewNote": ""
+      },
+      "suspiciousBehaviors": [],
+      "notes": [
+        "Scan returned no detections: YOLO model did not run."
+      ]
     }
   ]
 }

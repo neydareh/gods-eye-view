@@ -1,3 +1,6 @@
+import { attachCctvVideo } from './layers/cctv/videoPlayback.js';
+import { cctvWatchFeed } from './cctvWatchFeed.js';
+
 const OPTION_RENDER_LIMIT = 80;
 
 function cameraFrameUrl(camera) {
@@ -33,6 +36,18 @@ function reportPayload(camera, scan) {
           : 'not_configured',
     },
     detections: modelRan ? scan.detections || [] : [],
+    tracks: modelRan ? scan.tracks || [] : [],
+    events: modelRan ? scan.events || [] : [],
+    assessment: modelRan ? scan.assessment || null : null,
+    humanReview: {
+      status: scan?.assessment?.requiresHumanReview
+        ? 'pending_review'
+        : 'not_required',
+      decision: null,
+      reviewedBy: null,
+      reviewedAt: null,
+      reviewNote: '',
+    },
     suspiciousBehaviors: modelRan ? scan.suspiciousBehaviors || [] : [],
     scanStatus: scan?.status || 'not_run',
     notes: modelRan
@@ -93,19 +108,51 @@ export function initializeCctvWatchModule({
     combo: documentRef.getElementById('cctv-watch-camera-combobox'),
     options: documentRef.getElementById('cctv-watch-camera-options'),
     frame: documentRef.getElementById('cctv-watch-frame'),
+    video: documentRef.getElementById('cctv-watch-video'),
     empty: documentRef.getElementById('cctv-watch-empty'),
     provider: documentRef.getElementById('cctv-watch-provider'),
     title: documentRef.getElementById('cctv-watch-title'),
     meta: documentRef.getElementById('cctv-watch-meta'),
     analyze: documentRef.getElementById('cctv-watch-analyze'),
+    live: documentRef.getElementById('cctv-watch-live'),
     saveReport: documentRef.getElementById('cctv-watch-save-report'),
     report: documentRef.getElementById('cctv-watch-report'),
+    threat: documentRef.getElementById('cctv-watch-threat'),
+    reviewState: documentRef.getElementById('cctv-watch-review-state'),
+    assessment: documentRef.getElementById('cctv-watch-assessment'),
+    detections: documentRef.getElementById('cctv-watch-detections'),
+    events: documentRef.getElementById('cctv-watch-events'),
+    evidence: documentRef.getElementById('cctv-watch-evidence'),
+    history: documentRef.getElementById('cctv-watch-history'),
+    reviewButtons: [...(root.querySelectorAll?.('[data-review]') || [])],
   };
 
   let cameras = [];
   let filteredCameras = [];
   let selectedCamera = null;
   let lastScan = null;
+  let lastSavedReportId = null;
+  let liveTimer = null;
+  let scanInFlight = false;
+  let liveCameraId = null;
+  let mediaPlayback = null;
+
+  function stopMediaPlayback() {
+    mediaPlayback?.dispose();
+    mediaPlayback = null;
+    if (elements.video) {
+      elements.video.hidden = true;
+      elements.video.removeAttribute('src');
+      elements.video.load();
+    }
+  }
+
+  function stopLive() {
+    if (liveTimer) clearInterval(liveTimer);
+    liveTimer = null;
+    liveCameraId = null;
+    scanInFlight = false;
+  }
 
   function setStatus(text) {
     if (elements.status) elements.status.textContent = text;
@@ -166,8 +213,11 @@ export function initializeCctvWatchModule({
   }
 
   function clearSelectedCamera() {
+    stopLive();
+    stopMediaPlayback();
     selectedCamera = null;
     lastScan = null;
+    lastSavedReportId = null;
     syncComboValue();
     renderOptions();
     setOptionsOpen(false);
@@ -180,7 +230,20 @@ export function initializeCctvWatchModule({
     elements.meta.textContent = 'Choose a camera to prepare analysis.';
     elements.analyze.disabled = true;
     if (elements.saveReport) elements.saveReport.disabled = true;
-    elements.report.textContent = 'YOLO scaffold idle.';
+    elements.report.textContent =
+      'YOLO scan unavailable until a model is configured.';
+    if (elements.threat) elements.threat.textContent = 'NO ASSESSMENT';
+    if (elements.reviewState)
+      elements.reviewState.textContent = 'Select a camera to begin.';
+    if (elements.assessment)
+      elements.assessment.textContent =
+        'Analysis is advisory. A human operator makes final decisions.';
+    if (elements.events) elements.events.replaceChildren();
+    if (elements.detections) elements.detections.replaceChildren();
+    if (elements.evidence) elements.evidence.replaceChildren();
+    elements.reviewButtons.forEach((button) => {
+      button.disabled = true;
+    });
   }
 
   function applySearch() {
@@ -204,20 +267,41 @@ export function initializeCctvWatchModule({
   }
 
   function selectCamera(cameraId) {
+    stopLive();
+    stopMediaPlayback();
     selectedCamera = cameras.find((camera) => camera.id === cameraId) || null;
     if (!selectedCamera) {
       clearSelectedCamera();
       return;
     }
     lastScan = null;
+    lastSavedReportId = null;
     filteredCameras = filterCameras(cameras, cameraLabel(selectedCamera));
     syncComboValue();
     renderOptions();
     setOptionsOpen(false);
+    const feed = cctvWatchFeed(selectedCamera);
     elements.empty.hidden = true;
-    elements.frame.hidden = false;
     elements.frame.alt = `${selectedCamera.name || selectedCamera.id} CCTV feed`;
-    elements.frame.src = cameraFrameUrl(selectedCamera);
+    if (feed.kind === 'video') {
+      elements.frame.hidden = true;
+      elements.frame.removeAttribute('src');
+      elements.video.hidden = false;
+      mediaPlayback = attachCctvVideo(elements.video, feed.url, feed.feedType, {
+        onFailure: () => {
+          if (selectedCamera?.id !== cameraId) return;
+          elements.video.hidden = true;
+          elements.frame.hidden = false;
+          elements.frame.src = cameraFrameUrl(selectedCamera);
+        },
+      });
+    } else {
+      elements.frame.hidden = false;
+      elements.frame.src =
+        feed.kind === 'mjpeg'
+          ? `${feed.url}?ts=${Date.now()}`
+          : cameraFrameUrl(selectedCamera);
+    }
     elements.provider.textContent = selectedCamera.provider || 'CCTV SOURCE';
     elements.title.textContent = selectedCamera.name || selectedCamera.id;
     elements.meta.textContent = [
@@ -225,10 +309,27 @@ export function initializeCctvWatchModule({
       selectedCamera.feedType || 'image',
       selectedCamera.sourceKind || 'source',
     ].join(' · ');
-    elements.analyze.disabled = false;
+    elements.analyze.disabled = true;
     if (elements.saveReport) elements.saveReport.disabled = true;
-    elements.report.textContent =
-      'YOLO scaffold ready. Run scan to analyze this feed.';
+    elements.report.textContent = 'Starting automatic live analysis…';
+    if (elements.threat) elements.threat.textContent = 'NO ASSESSMENT';
+    if (elements.reviewState)
+      elements.reviewState.textContent =
+        feed.kind === 'image'
+          ? 'Snapshot feed; live analysis requires a stream.'
+          : 'Connecting live analysis';
+    if (elements.assessment)
+      elements.assessment.textContent =
+        'Scan results are advisory and require human interpretation.';
+    if (elements.events) elements.events.replaceChildren();
+    if (elements.detections) elements.detections.replaceChildren();
+    if (elements.evidence) elements.evidence.replaceChildren();
+    elements.reviewButtons.forEach((button) => {
+      button.disabled = true;
+    });
+    if (feed.kind !== 'image') startLiveAnalysis(cameraId);
+    else void runScan('single');
+    void loadReports();
   }
 
   async function loadCameras() {
@@ -259,39 +360,203 @@ export function initializeCctvWatchModule({
     }
   }
 
-  async function runScan() {
+  function captureFrame(cameraId) {
+    const source = elements.video.hidden ? elements.frame : elements.video;
+    const width = source.videoWidth || source.naturalWidth;
+    const height = source.videoHeight || source.naturalHeight;
+    if (!width || !height || source.hidden) return null;
+    const scale = Math.min(1, 640 / width);
+    const canvas = documentRef.createElement('canvas');
+    canvas.width = Math.round(width * scale);
+    canvas.height = Math.round(height * scale);
+    const context = canvas.getContext('2d');
+    if (!context) return null;
+    context.drawImage(source, 0, 0, canvas.width, canvas.height);
+    return {
+      cameraId,
+      mode: 'live',
+      frameData: canvas.toDataURL('image/jpeg', 0.55),
+    };
+  }
+
+  async function runScan(mode = 'live') {
     if (!selectedCamera) return;
-    elements.analyze.disabled = true;
+    const cameraId = selectedCamera.id;
+    let frame;
+    try {
+      frame = captureFrame(cameraId);
+    } catch {
+      frame = null;
+    }
+    if (!frame) {
+      if (elements.reviewState)
+        elements.reviewState.textContent = 'Waiting for camera frame';
+      return;
+    }
+    if (scanInFlight) return;
+    scanInFlight = true;
     if (elements.saveReport) elements.saveReport.disabled = true;
-    elements.report.textContent = 'Scan running…';
+    if (elements.reviewState)
+      elements.reviewState.textContent = 'Live analysis running';
     try {
       const response = await fetchImpl('/api/cctv-analysis/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          cameraId: selectedCamera.id,
-          mode: 'single',
-          frameUrl: cameraFrameUrl(selectedCamera),
+          ...frame,
+          mode,
         }),
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const scan = await response.json();
+      if (selectedCamera?.id !== cameraId) return;
       lastScan = scan;
+      renderScan(scan);
       if (scan.status === 'model_unavailable') {
         elements.report.textContent =
           'Model unavailable: YOLO is not configured on this server. No detections were produced.';
+        stopLive();
       } else if (scan.status === 'ok') {
         elements.report.textContent = JSON.stringify(scan, null, 2);
+      } else if (scan.status === 'scan_failed') {
+        elements.report.textContent =
+          'Scan failed: the local YOLO worker could not complete inference. Check the model and Python setup.';
+        stopLive();
       } else {
         elements.report.textContent = `Scan finished with unknown status: ${scan.status || 'none'}`;
       }
       if (elements.saveReport) elements.saveReport.disabled = false;
     } catch (error) {
+      if (selectedCamera?.id !== cameraId) return;
       lastScan = null;
+      stopLive();
+      if (elements.reviewState)
+        elements.reviewState.textContent = 'Scan failed';
       elements.report.textContent = `Scan failed: ${error?.message || error}`;
     } finally {
-      elements.analyze.disabled = false;
+      scanInFlight = false;
     }
+  }
+
+  function renderScan(scan) {
+    const assessment = scan?.assessment;
+    const level = assessment?.threatLevel || 'normal';
+    if (elements.threat) {
+      elements.threat.textContent = level.replaceAll('_', ' ').toUpperCase();
+      elements.threat.dataset.level = level;
+    }
+    if (elements.reviewState) {
+      elements.reviewState.textContent = assessment?.requiresHumanReview
+        ? 'Human review required'
+        : scan?.status === 'model_unavailable'
+          ? 'YOLO model unavailable'
+          : scan?.status === 'scan_failed'
+            ? 'Scan failed'
+            : 'Provisional assessment';
+    }
+    if (elements.assessment) {
+      elements.assessment.textContent =
+        assessment?.summary ||
+        'YOLO is not configured. No detections or assessment were produced.';
+    }
+    const events = Array.isArray(scan?.events) ? scan.events : [];
+    if (elements.events) {
+      elements.events.replaceChildren(
+        ...events.map((event) => {
+          const item = documentRef.createElement('li');
+          item.textContent = `${event.type.replaceAll('_', ' ')} · ${event.evidence.join('; ')}`;
+          return item;
+        }),
+      );
+    }
+    const detections = Array.isArray(scan?.detections) ? scan.detections : [];
+    if (elements.detections) {
+      elements.detections.replaceChildren(
+        ...detections.slice(0, 20).map((detection) => {
+          const item = documentRef.createElement('li');
+          item.textContent = `${detection.label} · ${Math.round(detection.confidence * 100)}%${detection.trackId ? ` · track ${detection.trackId}` : ''}`;
+          return item;
+        }),
+      );
+    }
+    if (elements.evidence) {
+      const evidence = assessment?.evidence || [];
+      elements.evidence.replaceChildren(
+        ...evidence.slice(0, 12).map((line) => {
+          const item = documentRef.createElement('li');
+          item.textContent = line;
+          return item;
+        }),
+      );
+    }
+    elements.reviewButtons.forEach((button) => {
+      button.disabled = !lastSavedReportId || !assessment;
+    });
+  }
+
+  function startLiveAnalysis(cameraId) {
+    liveCameraId = cameraId;
+    void runScan('live');
+    liveTimer = setInterval(() => {
+      if (selectedCamera?.id === liveCameraId) void runScan('live');
+    }, 2500);
+  }
+
+  async function loadReports() {
+    if (!elements.history) return;
+    try {
+      const reportUrl = new URLSearchParams({
+        limit: '10',
+        cameraId: selectedCamera?.id || '',
+      });
+      const response = await fetchImpl(
+        `/api/cctv-analysis/reports?${reportUrl}`,
+        { cache: 'no-store' },
+      );
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const payload = await response.json();
+      const reports = payload.reports || [];
+      elements.history.replaceChildren(
+        ...reports.map((report) => {
+          const item = documentRef.createElement('li');
+          const button = documentRef.createElement('button');
+          button.type = 'button';
+          button.textContent = `${new Date(report.capturedAt).toLocaleString()} · ${report.humanReview?.status || report.assessment?.threatLevel || report.model?.status || 'saved'}`;
+          button.addEventListener('click', () => {
+            lastSavedReportId = report.id;
+            elements.reviewButtons.forEach((button) => {
+              button.disabled = !report.assessment;
+            });
+            elements.report.textContent = JSON.stringify(report, null, 2);
+          });
+          item.append(button);
+          return item;
+        }),
+      );
+    } catch {
+      elements.history.replaceChildren();
+    }
+  }
+
+  async function submitReview(decision) {
+    if (!lastSavedReportId) return;
+    const response = await fetchImpl('/api/cctv-analysis/reviews', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reportId: lastSavedReportId, decision }),
+    });
+    if (!response.ok) {
+      if (elements.reviewState)
+        elements.reviewState.textContent = 'Review save failed';
+      return;
+    }
+    const { review } = await response.json();
+    if (elements.reviewState)
+      elements.reviewState.textContent = `Human decision: ${review.status.replaceAll('_', ' ')}`;
+    elements.reviewButtons.forEach((button) => {
+      button.disabled = false;
+    });
+    void loadReports();
   }
 
   async function writeReport() {
@@ -307,6 +572,13 @@ export function initializeCctvWatchModule({
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const result = await response.json();
+      lastSavedReportId = result.reportId || null;
+      elements.reviewButtons.forEach((button) => {
+        button.disabled = !lastSavedReportId || !lastScan?.assessment;
+      });
+      if (elements.reviewState && lastSavedReportId)
+        elements.reviewState.textContent =
+          'Report saved · awaiting human review';
       elements.report.textContent = JSON.stringify(
         { ...payload, reportFile: result.file },
         null,
@@ -342,6 +614,12 @@ export function initializeCctvWatchModule({
   });
   elements.analyze?.addEventListener('click', runScan);
   elements.saveReport?.addEventListener('click', writeReport);
+  elements.reviewButtons.forEach((button) => {
+    button.addEventListener(
+      'click',
+      () => void submitReview(button.dataset.review),
+    );
+  });
   void loadCameras();
 
   return Object.freeze({
@@ -349,6 +627,8 @@ export function initializeCctvWatchModule({
     selectCamera,
     runScan,
     writeReport,
+    loadReports,
+    submitReview,
     getState: () =>
       Object.freeze({
         cameraCount: cameras.length,

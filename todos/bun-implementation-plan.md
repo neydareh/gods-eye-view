@@ -4,13 +4,47 @@
 
 - Phase 1 (Compatibility Audit): done — see Evidence below.
 - Phase 2 (Bun CCTV Analysis Service): done — `server/bun/cctv-analysis-service.js` implements the report contract; Node/Vite middleware in `server/providers/cctv-analysis.js` remains as fallback.
-- Phase 3 (YOLO Runtime Orchestration): scaffold done — `POST /api/cctv-analysis/scan` returns the final schema with an honest `model_unavailable` status until a YOLO runtime is wired. Detection normalization and deterministic behavior rules live in `server/providers/cctv-analysis/rules.js`, separate from raw detections. Real YOLO runtime: not started.
-- Phase 4 (Provider Middleware Trial): not started.
-- Phase 5 (Optional Tooling Adoption): partially exercised — `bun run build` and `bun test` verified for the CCTV analysis module only; Node remains the default test runner.
+- Phase 3 (YOLO Runtime Orchestration): done — `POST /api/cctv-analysis/scan` returns the final schema with real YOLO inference when `CCTV_YOLO_MODEL` and `CCTV_YOLO_PYTHON` are configured. Detection normalization and deterministic behavior rules live in `server/providers/cctv-analysis/rules.js`, separate from raw detections.
+  - Fixed bug in `scan.js`: `analyze()` now uses provided `frameBytes` directly without requiring catalog lookup first.
+  - Worker communicates via stdin/stdout JSON protocol; spawns Python process with `ultralytics` + `torch`.
+  - Requires `.venv-yolo` Python (system `python3` lacks ultralytics). Documented in `.env.example`.
+- Phase 4 (Provider Middleware Trial): done — Bun service passes 12 parity tests against Node provider contract (report CRUD, scan handling, human review, error cases).
+- Phase 5 (Optional Tooling Adoption): partially exercised — `bun run build` and `bun test` verified for the CCTV analysis module only; Node remains the default test runner. Some tests fail under Bun due to Node-specific APIs (`registerHooks`, regex patterns in source code assertions).
 
 ## Evidence
 
 Verified on 2026-09-24 with Bun 1.3.14 (Node emulation 24.3.0) on macOS:
+
+Verified on 2026-10-01 with Bun 1.3.14 on macOS:
+
+### YOLO Runtime Integration (Phase 3)
+
+- `yolo_worker.py` runs successfully under `.venv-yolo/bin/python` with `ultralytics>=8.3,<9` and `pillow>=10,<13`.
+- Worker communicates via stdin/stdout JSON protocol: receives `{requestId, cameraId, image}` (base64), outputs `{requestId, model, detections}`.
+- Each detection includes: `id`, `trackId`, `label`, `confidence`, `box` (normalized x/y/w/h), `timestamp`.
+- Model tracking (`persist=True`) maintains identity across frames; resets on camera change.
+- Error handling: invalid images produce `{requestId, error: <message>}` instead of crashing.
+- Node.js spawn in `scan.js` manages worker lifecycle with timeout (45s), pending request queue, and graceful failure propagation.
+- Fixed bug: `analyze()` now uses provided `frameBytes` directly without requiring catalog lookup first.
+- Documented env vars in `.env.example`: `CCTV_YOLO_MODEL` and `CCTV_YOLO_PYTHON`.
+- Full scan pipeline test (`scripts/test-scan-pipeline.mjs`): 4/4 tests pass — single scan, live mode, failure handling, validation.
+- Fast worker test (`scripts/test-yolo-fast.mjs`): 3/3 cameras tested, ~1.6s per inference.
+
+### Provider Middleware Parity (Phase 4)
+
+- Bun service parity tests (`server/bun/cctv-analysis-parity.test.mjs`): 12/12 pass under `bun test`.
+- Tests cover: report storage, malformed JSON rejection, missing cameraId rejection, report listing, pagination, cameraId filtering, scan validation, model_unavailable status, human review storage, invalid decision rejection, method enforcement (405), unknown path (404).
+- SSE live stream endpoint works: polls scan every 2s, emits `detection_tick`, `scan_status`, `assessment_updated` events.
+
+### Test Suite Compatibility (Phase 5)
+
+- `bun test src/cctvAnalysisService.test.mjs`: 9/9 pass — identical to Node results.
+- `bun test server/bun/cctv-analysis-parity.test.mjs`: 12/12 pass.
+- Full `bun test` suite: some failures due to Node-specific APIs:
+  - `registerHooks` not available in Bun's `node:module` shim.
+  - Regex assertions in `cameraHandoff.test.mjs` fail because Bun's source code differs from Node output (minification/formatting differences).
+- Node 24 remains the calibrated test runtime for full suite compatibility.
+- `bun run build` (Vite 6 + Cesium 1.124): still passes, same chunk layout as Node.
 
 - `bun install --dry-run` resolves the full dependency graph from `package.json` without errors. No `bun.lockb` was committed; npm's `package-lock.json` stays authoritative.
 - `bun run build` (Vite 6 + `vite-plugin-cesium` + Cesium 1.124) completes successfully (`✓ built in 3.77s`), same chunk layout as Node.
@@ -147,6 +181,23 @@ Only after runtime proof:
 - Replacing Vite immediately.
 - Moving all providers at once.
 - Claiming performance wins without benchmark evidence.
+
+## Decision: Bun as Default Tooling (Phase 5)
+
+**Recommendation**: Keep Node 24 as the default test runner; use Bun for provider APIs where compatible.
+
+Rationale:
+- Bun passes all CCTV analysis tests (9 unit + 12 parity = 21 tests).
+- Full `bun test` suite has failures due to Node-specific APIs (`registerHooks`) and source-code regex assertions that differ between Bun's and Node's output formatting.
+- `bun run build` works identically to Node for Vite/Cesium.
+- The Bun service (`server/bun/cctv-analysis-service.js`) is production-ready for provider endpoints.
+- No immediate need to replace `npm run build` or make `bun.lock` authoritative until broader test parity is achieved.
+
+## Remaining Work
+
+- Run calibrated allocation-budget tests under Bun to verify no regression.
+- Consider migrating `scripts/run-unit-tests.mjs` to support both runners with a `--runner=bun|node` flag.
+- Decide whether `bun.lock` or `package-lock.json` is authoritative once Phase 5 reaches full parity.
 
 ## First Implementation Task
 

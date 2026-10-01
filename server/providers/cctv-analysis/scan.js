@@ -49,13 +49,13 @@ export function resolveYoloRuntime({ sourceRoot = process.cwd() } = {}) {
     name: 'Ultralytics YOLO',
     version: 'configured-local',
     async analyze(cameraId, frameBytes = null) {
-      const [{ createCctvCatalog }, { fetchCctvImageFromUpstream }] =
-        await Promise.all([import('../cctv/catalog.js'), import('../cctv.js')]);
-      const sources = await createCctvCatalog({ sourceRoot })();
-      const camera = sources.find((source) => source.id === cameraId);
-      if (!camera) throw new Error('camera_not_registered');
       let imageBytes = frameBytes;
       if (!imageBytes) {
+        const [{ createCctvCatalog }, { fetchCctvImageFromUpstream }] =
+          await Promise.all([import('../cctv/catalog.js'), import('../cctv.js')]);
+        const sources = await createCctvCatalog({ sourceRoot })();
+        const camera = sources.find((source) => source.id === cameraId);
+        if (!camera) throw new Error('camera_not_registered');
         const imageUrl = camera.snapshotUrl || camera.url;
         const image = await fetchCctvImageFromUpstream(imageUrl);
         if (!image?.ok) throw new Error('camera_frame_unavailable');

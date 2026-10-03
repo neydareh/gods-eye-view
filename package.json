@@ -36,7 +36,6 @@
     "format": "node scripts/format.mjs --write",
     "format:check": "node scripts/format.mjs --check",
     "dev": "vite",
-    "dev:cctv-analysis:bun": "bun server/bun/cctv-analysis-service.js",
     "dev:secure": "./scripts/dev-secure.sh",
     "opensky:import": "./scripts/opensky-import-client.sh",
     "build": "vite build",

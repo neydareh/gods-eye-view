@@ -1,4 +1,5 @@
 import * as Cesium from 'cesium';
+import { applyModelAtmosphereWorkaround } from './atmosphereCompat.js';
 
 const PINCH_ZOOM_MULTIPLIER = 8;
 const MAX_PINCH_PIXEL_DELTA = 120;
@@ -229,9 +230,14 @@ export function createApplicationViewer({ container, creditContainer }) {
     },
   });
   try {
+    // performance optimization
     viewer.targetFrameRate = performanceOptions.targetFrameRate;
     viewer.resolutionScale = performanceOptions.resolutionScale;
     applyViewerSmoothness(viewer);
+    // Before any tile builds a draw command: Cesium's per-vertex model
+    // atmosphere fails to LINK on Apple's Metal backend and kills the
+    // render loop. See app/atmosphereCompat.js.
+    applyModelAtmosphereWorkaround(viewer.scene);
     viewer.scene.globe.show = false;
     viewer.scene.skyAtmosphere.show = true;
     viewer.scene.skyAtmosphere.atmosphereLightIntensity = 18;

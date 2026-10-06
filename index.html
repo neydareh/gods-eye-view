@@ -17,7 +17,7 @@
        names a glyph this list is missing, because a missing glyph does not draw
        a box — the ligature never forms and the element renders the literal word. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&icon_names=adjust,arrow_drop_down,arrow_forward,arrow_left,arrow_right,bolt,chevron_left,chevron_right,close,close_fullscreen,dark_mode,draw,east,flare,flight,layers_clear,light_mode,local_fire_department,my_location,navigation,normal,on,open_in_full,public,radar,radio,right_panel_close,right_panel_open,rocket_launch,skip_next,skip_previous,view_in_ar"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&icon_names=adjust,arrow_drop_down,arrow_forward,arrow_left,arrow_right,bolt,chevron_left,chevron_right,close,close_fullscreen,dark_mode,draw,drag_indicator,east,flare,flight,layers_clear,light_mode,local_fire_department,my_location,navigation,normal,on,open_in_full,public,radar,radio,right_panel_close,right_panel_open,rocket_launch,skip_next,skip_previous,view_in_ar"
       rel="stylesheet"
     />
   </head>
@@ -44,11 +44,11 @@
         <div class="parent-app-layout-controls" aria-label="Module layout">
           <label>
             <span>LEFT</span>
-            <select id="left-module-select" aria-label="Left module"></select>
+            <select id="left-module-select"></select>
           </label>
           <label>
             <span>RIGHT</span>
-            <select id="right-module-select" aria-label="Right module"></select>
+            <select id="right-module-select" ></select>
           </label>
         </div>
       </header>
@@ -57,12 +57,23 @@
         <section
           id="left-module-pane"
           class="module-pane module-pane-left"
-          aria-label="Left module"
         ></section>
+        <button
+          id="module-splitter"
+          class="module-splitter"
+          type="button"
+          role="separator"
+          aria-label="Resize modules"
+          aria-orientation="vertical"
+          aria-valuemin="25"
+          aria-valuemax="75"
+          aria-valuenow="50"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">drag_indicator</span>
+        </button>
         <section
           id="right-module-pane"
           class="module-pane module-pane-right"
-          aria-label="Right module"
         ></section>
       </section>
     </main>

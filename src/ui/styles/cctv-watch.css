@@ -204,9 +204,9 @@
 }
 
 .cctv-watch-detail-body {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  align-items: start;
+  justify-items: start;
   gap: 12px;
   padding: 12px 14px;
   border-top: 1px solid var(--glass-border);
@@ -221,7 +221,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  flex: none;
 }
 
 .cctv-watch-detail h3,

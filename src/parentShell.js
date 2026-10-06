@@ -72,8 +72,59 @@ export function initializeParentShell({
   const rightPane = documentRef.getElementById('right-module-pane');
   const leftSelect = documentRef.getElementById('left-module-select');
   const rightSelect = documentRef.getElementById('right-module-select');
+  const splitter = documentRef.getElementById('module-splitter');
   if (!shell || !leftPane || !rightPane || !leftSelect || !rightSelect)
     return null;
+
+  if (splitter) {
+    const split =
+      documentRef.querySelector?.('.parent-app-split') ||
+      splitter.parentElement;
+    const setSplit = (clientX) => {
+      const rect = split?.getBoundingClientRect?.();
+      if (!rect || !rect.width) return;
+      const percent = Math.max(
+        25,
+        Math.min(75, ((clientX - rect.left) / rect.width) * 100),
+      );
+      split.style.setProperty('--module-split', `${percent}%`);
+      splitter.setAttribute('aria-valuenow', String(Math.round(percent)));
+      scheduleResizeFrames(windowRef);
+    };
+    splitter.addEventListener('pointerdown', (event) => {
+      splitter.setPointerCapture?.(event.pointerId);
+      split?.classList.add('is-resizing');
+      setSplit(event.clientX);
+    });
+    splitter.addEventListener('pointermove', (event) => {
+      if (splitter.hasPointerCapture?.(event.pointerId))
+        setSplit(event.clientX);
+    });
+    const stopResize = (event) => {
+      if (splitter.hasPointerCapture?.(event.pointerId))
+        splitter.releasePointerCapture?.(event.pointerId);
+      split?.classList.remove('is-resizing');
+    };
+    splitter.addEventListener('pointerup', stopResize);
+    splitter.addEventListener('pointercancel', stopResize);
+    splitter.addEventListener('keydown', (event) => {
+      const current = Number(splitter.getAttribute('aria-valuenow')) || 50;
+      const next =
+        event.key === 'ArrowLeft'
+          ? current - 2
+          : event.key === 'ArrowRight'
+            ? current + 2
+            : event.key === 'Home'
+              ? 25
+              : event.key === 'End'
+                ? 75
+                : null;
+      if (next === null) return;
+      event.preventDefault();
+      const rect = split?.getBoundingClientRect?.();
+      if (rect) setSplit(rect.left + (next / 100) * rect.width);
+    });
+  }
 
   const emptyLeft = createEmptyModule(documentRef, 'Left');
   const emptyRight = createEmptyModule(documentRef, 'Right');

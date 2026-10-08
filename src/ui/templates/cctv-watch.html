@@ -1,0 +1,98 @@
+<header class="cctv-watch-header">
+  <div>
+    <span>CCTV WATCH</span>
+    <h2>Camera Intelligence</h2>
+  </div>
+  <button id="cctv-watch-refresh" type="button">REFRESH</button>
+</header>
+<div class="cctv-watch-grid">
+  <aside class="cctv-watch-list-panel">
+    <div
+      class="cctv-watch-list-status"
+      id="cctv-watch-list-status"
+      role="status"
+      aria-live="polite"
+    >
+      Loading cameras
+    </div>
+    <label class="cctv-watch-selector cctv-watch-combobox">
+      <span>CAMERA FEED</span>
+      <input
+        id="cctv-watch-camera-combobox"
+        type="search"
+        placeholder="Search or select a camera feed..."
+        autocomplete="off"
+        spellcheck="false"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-expanded="false"
+        aria-controls="cctv-watch-camera-options"
+        aria-label="Search or select CCTV camera feed"
+        disabled
+      />
+      <div
+        id="cctv-watch-camera-options"
+        class="cctv-watch-options"
+        role="listbox"
+        hidden
+      ></div>
+    </label>
+  </aside>
+  <section class="cctv-watch-detail" aria-labelledby="cctv-watch-title">
+    <div class="cctv-watch-frame-wrap">
+      <img id="cctv-watch-frame" alt="" hidden />
+      <video id="cctv-watch-video" muted playsinline hidden></video>
+      <div id="cctv-watch-empty" class="cctv-watch-empty">
+        Select a camera feed
+      </div>
+    </div>
+    <div class="cctv-watch-detail-body">
+      <div>
+        <span id="cctv-watch-provider" class="cctv-watch-kicker"
+          >NO FEED SELECTED</span
+        >
+        <h3 id="cctv-watch-title">Camera detail</h3>
+        <p id="cctv-watch-meta">Choose a camera to prepare analysis.</p>
+      </div>
+      <div class="cctv-watch-actions">
+        <button
+          id="cctv-watch-analyze"
+          type="button"
+          disabled
+          title="Live analysis starts automatically when a stream is selected"
+        >
+          RUN SCAN
+        </button>
+        <button id="cctv-watch-save-report" type="button" disabled>
+          SAVE REPORT
+        </button>
+      </div>
+    </div>
+    <section class="cctv-watch-analysis" aria-label="Camera analysis">
+      <div class="cctv-watch-summary">
+        <strong id="cctv-watch-threat" data-level="normal"
+          >NO ASSESSMENT</strong
+        >
+        <span id="cctv-watch-review-state">Select a camera to begin.</span>
+      </div>
+      <p id="cctv-watch-assessment">
+        Analysis is advisory. A human operator makes final decisions.
+      </p>
+      <ul id="cctv-watch-detections" aria-label="Observed detections"></ul>
+      <ul id="cctv-watch-events" aria-live="polite"></ul>
+      <ul id="cctv-watch-evidence" aria-label="Assessment evidence"></ul>
+      <div class="cctv-watch-review-actions" aria-label="Human review actions">
+        <button type="button" data-review="confirm" disabled>CONFIRM</button>
+        <button type="button" data-review="dismiss" disabled>DISMISS</button>
+        <button type="button" data-review="escalate" disabled>ESCALATE</button>
+        <button type="button" data-review="needs_more_review" disabled>
+          MORE REVIEW
+        </button>
+      </div>
+      <h4>Recent reports</h4>
+      <ol id="cctv-watch-history"></ol>
+      <pre id="cctv-watch-report" class="cctv-watch-report" aria-live="polite">
+ YOLO scan unavailable until a model is configured.</pre>
+    </section>
+  </section>
+</div>

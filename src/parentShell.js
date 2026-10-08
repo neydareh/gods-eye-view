@@ -1,22 +1,7 @@
 const MODULES = Object.freeze([
   { id: 'god-eye', label: "God's Eye View", elementId: 'god-eye-module' },
   { id: 'cctv-watch', label: 'CCTV Watch', elementId: 'cctv-watch-module' },
-  { id: 'coming-soon', label: 'Coming Soon', elementId: 'coming-soon-module' },
 ]);
-
-function createEmptyModule(documentRef, side) {
-  const surface = documentRef.createElement('section');
-  surface.className = 'module-surface empty-module';
-  surface.setAttribute('aria-label', `${side} module empty`);
-  surface.innerHTML = `
-    <div class="coming-soon-panel">
-      <span class="coming-soon-kicker">UNASSIGNED</span>
-      <h2>NO MODULE</h2>
-      <p>Select a module from the command bar.</p>
-    </div>
-  `;
-  return surface;
-}
 
 function populateSelector(documentRef, select, selectedId) {
   select.replaceChildren(
@@ -30,15 +15,22 @@ function populateSelector(documentRef, select, selectedId) {
   );
 }
 
+/**
+ * This function selects a module by moduleId
+ * @param {*} moduleId
+ * @returns the found module
+ */
 function moduleById(moduleId) {
-  return MODULES.find((module) => module.id === moduleId) || MODULES[1];
+  return MODULES.find((module) => module.id === moduleId) ?? MODULES[0];
 }
 
 function createModuleChangeEvent(windowRef, detail) {
   const EventCtor =
     windowRef?.CustomEvent ||
     (typeof CustomEvent === 'function' ? CustomEvent : null);
+
   if (EventCtor) return new EventCtor('gev:modules-changed', { detail });
+
   const event = new Event('gev:modules-changed');
   event.detail = detail;
   return event;
@@ -67,11 +59,18 @@ export function initializeParentShell({
   windowRef = window,
   onModulesChanged,
 } = {}) {
+  // shell
   const shell = documentRef.getElementById('parent-app-shell');
+
+  // left and right pane
   const leftPane = documentRef.getElementById('left-module-pane');
   const rightPane = documentRef.getElementById('right-module-pane');
+
+  // left and right dropdown
   const leftSelect = documentRef.getElementById('left-module-select');
   const rightSelect = documentRef.getElementById('right-module-select');
+
+  // screen splitter
   const splitter = documentRef.getElementById('module-splitter');
   if (!shell || !leftPane || !rightPane || !leftSelect || !rightSelect)
     return null;
@@ -126,37 +125,54 @@ export function initializeParentShell({
     });
   }
 
-  const emptyLeft = createEmptyModule(documentRef, 'Left');
-  const emptyRight = createEmptyModule(documentRef, 'Right');
+  // Capture the module nodes once. Looking them up by id on every mount is
+  // unsafe here: a swap moves each node out of the pane it currently lives in,
+  // so the second lookup would see a node that is no longer in the document.
+  const moduleElements = new Map(
+    MODULES.map((module) => [
+      module.id,
+      documentRef.getElementById(module.elementId),
+    ]),
+  );
+
   const state = {
     left: 'god-eye',
-    right: 'coming-soon',
+    right: 'cctv-watch',
   };
 
   populateSelector(documentRef, leftSelect, state.left);
   populateSelector(documentRef, rightSelect, state.right);
 
   function selectedFor(side, nextId) {
-    if (nextId !== 'god-eye') return nextId;
+    // Normalise before the id enters state so the panes, the selects and the
+    // shell dataset can never disagree about which modules exist.
+    const id = MODULES.some((module) => module.id === nextId)
+      ? nextId
+      : MODULES[0].id;
     const opposite = side === 'left' ? 'right' : 'left';
-    if (state[opposite] === 'god-eye') state[opposite] = 'coming-soon';
-    return nextId;
+    if (state[opposite] === id) state[opposite] = state[side];
+    return id;
   }
 
-  function mountPane(pane, side, moduleId) {
+  function mountPane(pane, moduleId) {
     const module = moduleById(moduleId);
-    const element = documentRef.getElementById(module.elementId);
-    pane.replaceChildren(element || (side === 'left' ? emptyLeft : emptyRight));
+    pane.replaceChildren(moduleElements.get(module.id));
     pane.dataset.module = module.id;
   }
 
+  /**
+   * Invoking this function would sync the modules
+   */
   function sync() {
-    mountPane(leftPane, 'left', state.left);
-    mountPane(rightPane, 'right', state.right);
+    mountPane(leftPane, state.left);
+    mountPane(rightPane, state.right);
+
     leftSelect.value = state.left;
     rightSelect.value = state.right;
+
     shell.dataset.leftModule = state.left;
     shell.dataset.rightModule = state.right;
+
     const detail = Object.freeze({ ...state });
     onModulesChanged?.(detail);
     windowRef.dispatchEvent(createModuleChangeEvent(windowRef, detail));
@@ -167,6 +183,7 @@ export function initializeParentShell({
     state.left = selectedFor('left', leftSelect.value);
     sync();
   });
+
   rightSelect.addEventListener('change', () => {
     state.right = selectedFor('right', rightSelect.value);
     sync();
@@ -175,11 +192,14 @@ export function initializeParentShell({
   sync();
   return Object.freeze({
     getState: () => Object.freeze({ ...state }),
-    setModules({ left = state.left, right = state.right } = {}) {
-      state.left = selectedFor('left', left);
-      state.right = selectedFor('right', right);
-      if (state.left === 'god-eye' && state.right === 'god-eye')
-        state.right = 'coming-soon';
+    setModules(modules = {}) {
+      // Apply only the sides the caller actually named. Defaulting from state
+      // here would re-feed a pre-swap value into selectedFor and undo the swap
+      // that the other side just performed.
+      if (modules.left !== undefined)
+        state.left = selectedFor('left', modules.left);
+      if (modules.right !== undefined)
+        state.right = selectedFor('right', modules.right);
       sync();
     },
   });

@@ -51,7 +51,7 @@ function fixture() {
     'left-module-select',
     'right-module-select',
     'god-eye-module',
-    'coming-soon-module',
+    'cctv-watch-module',
   ];
   for (const id of ids) elements.set(id, new FakeElement(id));
   const documentRef = {
@@ -78,12 +78,12 @@ function fixture() {
   };
 }
 
-test('parent shell mounts God Eye left and Coming Soon right by default', () => {
+test('parent shell mounts God Eye left and CCTV Watch right by default', () => {
   const f = fixture();
   const shell = initializeParentShell(f);
   assert.deepEqual(shell.getState(), {
     left: 'god-eye',
-    right: 'coming-soon',
+    right: 'cctv-watch',
   });
   assert.equal(
     f.elements.get('left-module-pane').children[0],
@@ -91,7 +91,7 @@ test('parent shell mounts God Eye left and Coming Soon right by default', () => 
   );
   assert.equal(
     f.elements.get('right-module-pane').children[0],
-    f.elements.get('coming-soon-module'),
+    f.elements.get('cctv-watch-module'),
   );
   assert.equal(f.getResizeCount(), 1);
 });
@@ -103,10 +103,10 @@ test('parent shell publishes module changes', () => {
     ...f,
     onModulesChanged: (state) => changes.push(state),
   });
-  shell.setModules({ left: 'coming-soon', right: 'cctv-watch' });
+  shell.setModules({ left: 'cctv-watch', right: 'god-eye' });
   assert.deepEqual(changes, [
-    { left: 'god-eye', right: 'coming-soon' },
-    { left: 'coming-soon', right: 'cctv-watch' },
+    { left: 'god-eye', right: 'cctv-watch' },
+    { left: 'cctv-watch', right: 'god-eye' },
   ]);
 });
 
@@ -132,7 +132,7 @@ test('parent shell moves God Eye instead of duplicating it', () => {
   const shell = initializeParentShell(f);
   shell.setModules({ right: 'god-eye' });
   assert.deepEqual(shell.getState(), {
-    left: 'coming-soon',
+    left: 'cctv-watch',
     right: 'god-eye',
   });
   assert.equal(
@@ -141,6 +141,45 @@ test('parent shell moves God Eye instead of duplicating it', () => {
   );
   assert.equal(
     f.elements.get('left-module-pane').children[0],
-    f.elements.get('coming-soon-module'),
+    f.elements.get('cctv-watch-module'),
+  );
+});
+
+test('parent shell swaps modules without detaching either node', () => {
+  const f = fixture();
+  const shell = initializeParentShell(f);
+  shell.setModules({ left: 'cctv-watch' });
+  assert.deepEqual(shell.getState(), {
+    left: 'cctv-watch',
+    right: 'god-eye',
+  });
+  assert.equal(
+    f.elements.get('left-module-pane').children[0],
+    f.elements.get('cctv-watch-module'),
+  );
+  assert.equal(
+    f.elements.get('right-module-pane').children[0],
+    f.elements.get('god-eye-module'),
+  );
+  // Neither node may be orphaned: both must stay reachable for later switches.
+  assert.notEqual(f.elements.get('god-eye-module'), null);
+  assert.notEqual(f.elements.get('cctv-watch-module'), null);
+});
+
+test('parent shell ignores unknown module ids', () => {
+  const f = fixture();
+  const shell = initializeParentShell(f);
+  shell.setModules({ right: 'bogus' });
+  assert.deepEqual(shell.getState(), {
+    left: 'cctv-watch',
+    right: 'god-eye',
+  });
+  assert.equal(
+    f.elements.get('right-module-pane').children[0],
+    f.elements.get('god-eye-module'),
+  );
+  assert.equal(
+    f.elements.get('left-module-pane').children[0],
+    f.elements.get('cctv-watch-module'),
   );
 });

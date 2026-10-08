@@ -21,14 +21,18 @@ export function createApplication({
     data: createData,
     tools: createTools,
   };
+
   for (const phase of START_ORDER) {
     if (typeof factories[phase] !== 'function')
       throw new TypeError(`Missing ${phase} constructor`);
   }
+  
   const controller = new AbortController();
   const cleanups = Object.fromEntries(START_ORDER.map((phase) => [phase, []]));
   const components = {};
+
   const listeners = new Set();
+
   let state = Object.freeze({ status: 'created', phase: null });
   let startPromise;
   let destroyPromise;
@@ -36,6 +40,7 @@ export function createApplication({
 
   function publish(status, phase = null) {
     state = Object.freeze({ status, phase });
+    
     for (const listener of [...listeners]) {
       try {
         listener(state);
@@ -84,11 +89,13 @@ export function createApplication({
               cleanups[phase].push(dispose);
             },
           });
+          // console.log('components => ', components)
         } finally {
           acceptingCleanup = false;
         }
         controller.signal.throwIfAborted();
       }
+
       publish('ready');
       controller.signal.throwIfAborted();
       return Object.freeze({ ...components });

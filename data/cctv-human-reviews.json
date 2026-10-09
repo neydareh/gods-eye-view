@@ -20,6 +20,46 @@
       "reviewedBy": "operator",
       "reviewedAt": "2026-09-25T14:54:27.268Z",
       "reviewNote": ""
+    },
+    {
+      "schemaVersion": 1,
+      "id": "review_1791586748678_u4agfs",
+      "reportId": "report_1791586746343_p6djwu",
+      "status": "confirmed",
+      "decision": "confirm",
+      "reviewedBy": "operator",
+      "reviewedAt": "2026-10-09T22:59:08.678Z",
+      "reviewNote": ""
+    },
+    {
+      "schemaVersion": 1,
+      "id": "review_1791586751059_zqy6w4",
+      "reportId": "report_1791586746343_p6djwu",
+      "status": "needs_more_review",
+      "decision": "needs_more_review",
+      "reviewedBy": "operator",
+      "reviewedAt": "2026-10-09T22:59:11.059Z",
+      "reviewNote": ""
+    },
+    {
+      "schemaVersion": 1,
+      "id": "review_1791586752498_bvwv6u",
+      "reportId": "report_1791586746343_p6djwu",
+      "status": "confirmed",
+      "decision": "confirm",
+      "reviewedBy": "operator",
+      "reviewedAt": "2026-10-09T22:59:12.498Z",
+      "reviewNote": ""
+    },
+    {
+      "schemaVersion": 1,
+      "id": "review_1791586754298_6yk6df",
+      "reportId": "report_1791586746343_p6djwu",
+      "status": "escalate",
+      "decision": "escalate",
+      "reviewedBy": "operator",
+      "reviewedAt": "2026-10-09T22:59:14.298Z",
+      "reviewNote": ""
     }
   ]
 }

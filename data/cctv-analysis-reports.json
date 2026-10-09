@@ -68,6 +68,640 @@
       "notes": [
         "Scan returned no detections: YOLO model did not run."
       ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "report_1791586746343_p6djwu",
+      "receivedAt": "2026-10-09T22:59:06.343Z",
+      "module": "cctv-watch",
+      "cameraId": "deldot-scam082",
+      "cameraName": "US 113 @ US 9",
+      "provider": "DelDOT",
+      "city": "Sussex County",
+      "capturedAt": "2026-10-09T22:59:06.341Z",
+      "model": {
+        "kind": "yolo",
+        "status": "running"
+      },
+      "detections": [
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:04.392075+00:00_0",
+          "label": "car",
+          "confidence": 0.6836980581283569,
+          "box": {
+            "x": 0.3714120388031006,
+            "y": 0.41803665161132814,
+            "w": 0.037924575805664065,
+            "h": 0.05154605441623264
+          },
+          "timestamp": "2026-10-09T22:59:04.392075+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:04.392108+00:00_1",
+          "label": "car",
+          "confidence": 0.4067484736442566,
+          "box": {
+            "x": 0.000029632449150085448,
+            "y": 0.4078863779703776,
+            "w": 0.028093144297599792,
+            "h": 0.03945524427625868
+          },
+          "timestamp": "2026-10-09T22:59:04.392108+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:04.392119+00:00_2",
+          "label": "car",
+          "confidence": 0.4066140055656433,
+          "box": {
+            "x": 0.9500503540039062,
+            "y": 0.01073362562391493,
+            "w": 0.04031047821044922,
+            "h": 0.0361559444003635
+          },
+          "timestamp": "2026-10-09T22:59:04.392119+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:04.392128+00:00_3",
+          "label": "car",
+          "confidence": 0.3484918773174286,
+          "box": {
+            "x": 0.24963412284851075,
+            "y": 0.2865141126844618,
+            "w": 0.037176990509033205,
+            "h": 0.04169154696994358
+          },
+          "timestamp": "2026-10-09T22:59:04.392128+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:04.392137+00:00_4",
+          "label": "person",
+          "confidence": 0.31205570697784424,
+          "box": {
+            "x": 0.6660477638244628,
+            "y": 0.5732679578993055,
+            "w": 0.012372207641601563,
+            "h": 0.057928042941623265
+          },
+          "timestamp": "2026-10-09T22:59:04.392137+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:04.392146+00:00_5",
+          "label": "car",
+          "confidence": 0.2794090807437897,
+          "box": {
+            "x": 0.9310674667358398,
+            "y": 0.5843187967936198,
+            "w": 0.06808738708496094,
+            "h": 0.09598049587673611
+          },
+          "timestamp": "2026-10-09T22:59:04.392146+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:04.392154+00:00_6",
+          "label": "car",
+          "confidence": 0.27646830677986145,
+          "box": {
+            "x": 0.7249034881591797,
+            "y": 0.7879330952962239,
+            "w": 0.0892477035522461,
+            "h": 0.0691104465060764
+          },
+          "timestamp": "2026-10-09T22:59:04.392154+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:04.392163+00:00_7",
+          "label": "car",
+          "confidence": 0.20569057762622833,
+          "box": {
+            "x": 0.07628320455551148,
+            "y": 0.32105517917209203,
+            "w": 0.03173246383666992,
+            "h": 0.03279919094509549
+          },
+          "timestamp": "2026-10-09T22:59:04.392163+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:04.392171+00:00_8",
+          "label": "car",
+          "confidence": 0.19490113854408264,
+          "box": {
+            "x": 0.7258061408996582,
+            "y": 0.7859215630425347,
+            "w": 0.12540655136108397,
+            "h": 0.1632785373263889
+          },
+          "timestamp": "2026-10-09T22:59:04.392171+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:04.392179+00:00_9",
+          "label": "car",
+          "confidence": 0.17953479290008545,
+          "box": {
+            "x": 0.7318740844726562,
+            "y": 0.8331347995334202,
+            "w": 0.11886482238769532,
+            "h": 0.11726345486111112
+          },
+          "timestamp": "2026-10-09T22:59:04.392179+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:04.392187+00:00_10",
+          "label": "car",
+          "confidence": 0.17651033401489258,
+          "box": {
+            "x": 0.7838828086853027,
+            "y": 0.8453637864854601,
+            "w": 0.06676406860351562,
+            "h": 0.07627393934461806
+          },
+          "timestamp": "2026-10-09T22:59:04.392187+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:04.392195+00:00_11",
+          "label": "car",
+          "confidence": 0.12672021985054016,
+          "box": {
+            "x": 0.5513677597045898,
+            "y": 0.7443559434678819,
+            "w": 0.0242340087890625,
+            "h": 0.03078528510199653
+          },
+          "timestamp": "2026-10-09T22:59:04.392195+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        }
+      ],
+      "tracks": [
+        {
+          "schemaVersion": 1,
+          "id": "2",
+          "cameraId": "deldot-scam082"
+        }
+      ],
+      "events": [],
+      "assessment": {
+        "schemaVersion": 1,
+        "status": "ok",
+        "threatLevel": "normal",
+        "score": 0,
+        "confidence": 0.9,
+        "summary": "No behavior events were identified in the scanned frames.",
+        "evidence": [],
+        "recommendedAction": "Continue routine monitoring.",
+        "requiresHumanReview": false,
+        "finalDecision": null,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "model": "jev-rules-v1",
+        "promptVersion": "rules-v1",
+        "assessmentVersion": 1
+      },
+      "humanReview": {
+        "status": "not_required",
+        "decision": null,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "reviewNote": ""
+      },
+      "suspiciousBehaviors": [],
+      "notes": [
+        "Report generated from a completed YOLO scan."
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "report_1791586755984_mb0xlo",
+      "receivedAt": "2026-10-09T22:59:15.984Z",
+      "module": "cctv-watch",
+      "cameraId": "deldot-scam082",
+      "cameraName": "US 113 @ US 9",
+      "provider": "DelDOT",
+      "city": "Sussex County",
+      "capturedAt": "2026-10-09T22:59:15.974Z",
+      "model": {
+        "kind": "yolo",
+        "status": "running"
+      },
+      "detections": [
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445317+00:00_0",
+          "label": "car",
+          "confidence": 0.616347074508667,
+          "box": {
+            "x": 0.5812581062316895,
+            "y": 0.5229209476047092,
+            "w": 0.037337875366210936,
+            "h": 0.03557603624131944
+          },
+          "timestamp": "2026-10-09T22:59:14.445317+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445359+00:00_1",
+          "label": "car",
+          "confidence": 0.47764328122138977,
+          "box": {
+            "x": 0.6958891868591308,
+            "y": 0.6023001776801216,
+            "w": 0.04733543395996094,
+            "h": 0.030843098958333332
+          },
+          "timestamp": "2026-10-09T22:59:14.445359+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445370+00:00_2",
+          "label": "car",
+          "confidence": 0.4733305275440216,
+          "box": {
+            "x": 0.6406167030334473,
+            "y": 0.5277047051323784,
+            "w": 0.041707420349121095,
+            "h": 0.044409857855902776
+          },
+          "timestamp": "2026-10-09T22:59:14.445370+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445380+00:00_3",
+          "label": "car",
+          "confidence": 0.31144052743911743,
+          "box": {
+            "x": 0.9742461204528808,
+            "y": 0.7296455383300782,
+            "w": 0.02533893585205078,
+            "h": 0.03723025851779514
+          },
+          "timestamp": "2026-10-09T22:59:14.445380+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445390+00:00_4",
+          "label": "car",
+          "confidence": 0.29922980070114136,
+          "box": {
+            "x": 0.8003206253051758,
+            "y": 0.6244504292805989,
+            "w": 0.05943241119384766,
+            "h": 0.049525621202256946
+          },
+          "timestamp": "2026-10-09T22:59:14.445390+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445399+00:00_5",
+          "label": "car",
+          "confidence": 0.2949174642562866,
+          "box": {
+            "x": 0.1988361358642578,
+            "y": 0.5334164089626736,
+            "w": 0.02376413345336914,
+            "h": 0.05115390353732639
+          },
+          "timestamp": "2026-10-09T22:59:14.445399+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445408+00:00_6",
+          "label": "car",
+          "confidence": 0.2848573625087738,
+          "box": {
+            "x": 0.8102493286132812,
+            "y": 0.5180864969889323,
+            "w": 0.032683181762695315,
+            "h": 0.051571485731336804
+          },
+          "timestamp": "2026-10-09T22:59:14.445408+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445417+00:00_7",
+          "label": "car",
+          "confidence": 0.2524324953556061,
+          "box": {
+            "x": 0.21898856163024902,
+            "y": 0.573483657836914,
+            "w": 0.025836992263793945,
+            "h": 0.046386633978949654
+          },
+          "timestamp": "2026-10-09T22:59:14.445417+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445426+00:00_8",
+          "label": "car",
+          "confidence": 0.25063544511795044,
+          "box": {
+            "x": 0.8104863166809082,
+            "y": 0.5285816616482205,
+            "w": 0.026827239990234376,
+            "h": 0.0395172119140625
+          },
+          "timestamp": "2026-10-09T22:59:14.445426+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445435+00:00_9",
+          "label": "car",
+          "confidence": 0.20346325635910034,
+          "box": {
+            "x": 0.2623666048049927,
+            "y": 0.558160400390625,
+            "w": 0.018859434127807616,
+            "h": 0.03038296169704861
+          },
+          "timestamp": "2026-10-09T22:59:14.445435+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445443+00:00_10",
+          "label": "car",
+          "confidence": 0.18907225131988525,
+          "box": {
+            "x": 0.3595543384552002,
+            "y": 0.34798109266493055,
+            "w": 0.014247894287109375,
+            "h": 0.026671006944444443
+          },
+          "timestamp": "2026-10-09T22:59:14.445443+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445452+00:00_11",
+          "label": "car",
+          "confidence": 0.14978700876235962,
+          "box": {
+            "x": 0.49933929443359376,
+            "y": 0.37069842020670574,
+            "w": 0.019860267639160156,
+            "h": 0.027482774522569444
+          },
+          "timestamp": "2026-10-09T22:59:14.445452+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445462+00:00_12",
+          "label": "car",
+          "confidence": 0.1298719048500061,
+          "box": {
+            "x": 0.728269100189209,
+            "y": 0.42759568956163196,
+            "w": 0.07190866470336914,
+            "h": 0.04116583930121528
+          },
+          "timestamp": "2026-10-09T22:59:14.445462+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445471+00:00_13",
+          "label": "car",
+          "confidence": 0.12516984343528748,
+          "box": {
+            "x": 0.7982079029083252,
+            "y": 0.49228956434461807,
+            "w": 0.01984095573425293,
+            "h": 0.02430419921875
+          },
+          "timestamp": "2026-10-09T22:59:14.445471+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445480+00:00_14",
+          "label": "car",
+          "confidence": 0.12375346571207047,
+          "box": {
+            "x": 0.46616363525390625,
+            "y": 0.342403072781033,
+            "w": 0.022222518920898438,
+            "h": 0.029383934868706597
+          },
+          "timestamp": "2026-10-09T22:59:14.445480+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445489+00:00_15",
+          "label": "person",
+          "confidence": 0.12320936471223831,
+          "box": {
+            "x": 0.42987895011901855,
+            "y": 0.886936526828342,
+            "w": 0.011417579650878907,
+            "h": 0.05152587890625
+          },
+          "timestamp": "2026-10-09T22:59:14.445489+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445498+00:00_16",
+          "label": "car",
+          "confidence": 0.11784382164478302,
+          "box": {
+            "x": 0.7428431510925293,
+            "y": 0.4286450703938802,
+            "w": 0.061069393157958986,
+            "h": 0.03569217258029514
+          },
+          "timestamp": "2026-10-09T22:59:14.445498+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445507+00:00_17",
+          "label": "car",
+          "confidence": 0.1117907166481018,
+          "box": {
+            "x": 0.18880363702774047,
+            "y": 0.4900914510091146,
+            "w": 0.02267836332321167,
+            "h": 0.041896820068359375
+          },
+          "timestamp": "2026-10-09T22:59:14.445507+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445516+00:00_18",
+          "label": "car",
+          "confidence": 0.10462053120136261,
+          "box": {
+            "x": 0.800316047668457,
+            "y": 0.6254217359754775,
+            "w": 0.04704017639160156,
+            "h": 0.042094590928819446
+          },
+          "timestamp": "2026-10-09T22:59:14.445516+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445526+00:00_19",
+          "label": "car",
+          "confidence": 0.10321575403213501,
+          "box": {
+            "x": 0.5905063629150391,
+            "y": 0.43102281358506944,
+            "w": 0.025252723693847658,
+            "h": 0.026861063639322915
+          },
+          "timestamp": "2026-10-09T22:59:14.445526+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        },
+        {
+          "schemaVersion": 1,
+          "id": "det_2026-10-09T22:59:14.445534+00:00_20",
+          "label": "car",
+          "confidence": 0.1007251888513565,
+          "box": {
+            "x": 0.34127838611602784,
+            "y": 0.25622475941975914,
+            "w": 0.027046823501586915,
+            "h": 0.03190625508626302
+          },
+          "timestamp": "2026-10-09T22:59:14.445534+00:00",
+          "cameraId": "deldot-scam082",
+          "trackId": null,
+          "zone": ""
+        }
+      ],
+      "tracks": [
+        {
+          "schemaVersion": 1,
+          "id": "2",
+          "cameraId": "deldot-scam082"
+        }
+      ],
+      "events": [],
+      "assessment": {
+        "schemaVersion": 1,
+        "status": "ok",
+        "threatLevel": "normal",
+        "score": 0,
+        "confidence": 0.9,
+        "summary": "No behavior events were identified in the scanned frames.",
+        "evidence": [],
+        "recommendedAction": "Continue routine monitoring.",
+        "requiresHumanReview": false,
+        "finalDecision": null,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "model": "jev-rules-v1",
+        "promptVersion": "rules-v1",
+        "assessmentVersion": 1
+      },
+      "humanReview": {
+        "status": "not_required",
+        "decision": null,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "reviewNote": ""
+      },
+      "suspiciousBehaviors": [],
+      "notes": [
+        "Report generated from a completed YOLO scan."
+      ]
     }
   ]
 }

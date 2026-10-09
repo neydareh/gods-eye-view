@@ -38,6 +38,25 @@
       ></div>
     </label>
   </aside>
+  <section class="cctv-watch-analysis" aria-label="Camera analysis">
+    <div class="cctv-watch-summary">
+      <strong id="cctv-watch-threat" data-level="normal">NO ASSESSMENT</strong>
+      <span id="cctv-watch-review-state">Select a camera to begin.</span>
+    </div>
+    <p id="cctv-watch-assessment">Analysis is advisory. A human operator makes final decisions.</p>
+    <ul id="cctv-watch-detections" aria-label="Observed detections"></ul>
+    <ul id="cctv-watch-events" aria-live="polite"></ul>
+    <ul id="cctv-watch-evidence" aria-label="Assessment evidence"></ul>
+    <div class="cctv-watch-review-actions" aria-label="Human review actions">
+      <button type="button" data-review="confirm" disabled>CONFIRM</button>
+      <button type="button" data-review="dismiss" disabled>DISMISS</button>
+      <button type="button" data-review="escalate" disabled>ESCALATE</button>
+      <button type="button" data-review="needs_more_review" disabled>MORE REVIEW</button>
+    </div>
+    <h4>Recent reports</h4>
+    <ol id="cctv-watch-history"></ol>
+    <pre id="cctv-watch-report" class="cctv-watch-report" aria-live="polite">YOLO scan unavailable until a model is configured.</pre>
+  </section>
   <section class="cctv-watch-detail" aria-labelledby="cctv-watch-title">
     <div class="cctv-watch-frame-wrap">
       <img id="cctv-watch-frame" alt="" hidden />
@@ -68,31 +87,5 @@
         </button>
       </div>
     </div>
-    <section class="cctv-watch-analysis" aria-label="Camera analysis">
-      <div class="cctv-watch-summary">
-        <strong id="cctv-watch-threat" data-level="normal"
-          >NO ASSESSMENT</strong
-        >
-        <span id="cctv-watch-review-state">Select a camera to begin.</span>
-      </div>
-      <p id="cctv-watch-assessment">
-        Analysis is advisory. A human operator makes final decisions.
-      </p>
-      <ul id="cctv-watch-detections" aria-label="Observed detections"></ul>
-      <ul id="cctv-watch-events" aria-live="polite"></ul>
-      <ul id="cctv-watch-evidence" aria-label="Assessment evidence"></ul>
-      <div class="cctv-watch-review-actions" aria-label="Human review actions">
-        <button type="button" data-review="confirm" disabled>CONFIRM</button>
-        <button type="button" data-review="dismiss" disabled>DISMISS</button>
-        <button type="button" data-review="escalate" disabled>ESCALATE</button>
-        <button type="button" data-review="needs_more_review" disabled>
-          MORE REVIEW
-        </button>
-      </div>
-      <h4>Recent reports</h4>
-      <ol id="cctv-watch-history"></ol>
-      <pre id="cctv-watch-report" class="cctv-watch-report" aria-live="polite">
- YOLO scan unavailable until a model is configured.</pre>
-    </section>
   </section>
 </div>

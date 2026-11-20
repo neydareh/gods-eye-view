@@ -40,6 +40,13 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
+      # - name: Verify Pipeline Watch plans
+      #   if: matrix.node == '24.14.0'
+      #   run: |
+      #     node --test scripts/pipeline-watch-plans.test.mjs
+      #     npm run plans -- build
+      #     npm run plans -- check
+
       - name: Run setup policy checks
         run: npm run doctor -- --json
 

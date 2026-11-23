@@ -2,7 +2,7 @@
 
 **Program:** Pipeline Watch  
 **Tracker status:** Active planning  
-**Last updated:** November 19, 2026  
+**Last updated:** November 22, 2026
 **Primary plan:** [Pipeline Watch Software Master Plan](MASTER_PLAN_PIPELINE_WATCH_SOFTWARE.md)  
 **Product requirements:** [Pipeline Watch PRD](PRD_PIPELINE_WATCH.md)
 
@@ -105,7 +105,7 @@ For parallel agent work, use one branch/worktree per task or per disjoint task g
 
 | ID        | Task                                             | Depends on             | Primary write scope                          | Done when and verify                                                                                                                                  | Status    |
 | --------- | ------------------------------------------------ | ---------------------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| PW-W0-001 | Add shared schema version and enum constants.    | None                   | `src/pipelineWatch/contracts/version.js`     | Constants cover source kinds, incident states, review decisions, and response states; run `node --test src/pipelineWatch/contracts/version.test.mjs`. | `READY`   |
+| PW-W0-001 | Add shared schema version and enum constants.    | None                   | `src/pipelineWatch/contracts/version.js`     | Constants cover source kinds, incident states, review decisions, and response states; run `node --test src/pipelineWatch/contracts/version.test.mjs`. | `DONE`    |
 | PW-W0-002 | Define Pipeline and Segment records.             | W0-001                 | `src/pipelineWatch/contracts/pipeline.js`    | Records validate IDs, geometry, status, visibility, and segment ownership; add unit tests.                                                            | `PLANNED` |
 | PW-W0-003 | Define Observation record.                       | W0-001                 | `src/pipelineWatch/contracts/observation.js` | Camera, thermal, SCADA, drone, and health observations share one validated shape; add unit tests.                                                     | `PLANNED` |
 | PW-W0-004 | Define Evidence record.                          | W0-001                 | `src/pipelineWatch/contracts/evidence.js`    | Frame, clip, thermal matrix, SCADA payload, drone media, and field photo references validate; add unit tests.                                         | `PLANNED` |

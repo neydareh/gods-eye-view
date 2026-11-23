@@ -23,3 +23,6 @@ For each follow-up:
 - Do not add explanatory comments to generated or modified code. Prefer clear names and straightforward control flow.
 - Keep each function focused on one responsibility and small enough to understand without tracing excessive branches.
 - Extract a helper when it makes a complex function simpler, but avoid unnecessary abstractions, indirection, and cleverness.
+
+## Git Commit
+- format: feat: (tracker-id: i.e. PW-W0-002) short summary of work done
